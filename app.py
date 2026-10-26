@@ -1,356 +1,309 @@
-import os
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torchvision import models, transforms
-from PIL import Image
+import io
+from html import escape
+
 import streamlit as st
 
-# ---------------------------------------------------------
-# 1. PAGE CONFIGURATION & VISUAL THEME
-# ---------------------------------------------------------
-st.set_page_config(
-    page_title="FloraScan AI — Smart Phytopathology System",
-    page_icon="🌿",
-    layout="wide",
-    initial_sidebar_state="expanded"
+# config.py has no Streamlit calls, so it is safe to import before set_page_config
+from config import (
+    APP_NAME, APP_TAGLINE, CROP_EMOJI,
+    CLASS_NAMES, NUM_CLASSES, CONFIDENCE_THRESHOLD, INPUT_SIZE,
+    PATH_1, PATH_2,
+    ENGINE_1_LABEL, ENGINE_2_LABEL, DUAL_LABEL, ENGINE_1_SHORT, ENGINE_2_SHORT,
+    UNKNOWN_TONE, get_guide, get_meta,
 )
 
-# Custom CSS for Deep UI/UX Overhaul & Fixing Image Styles
-st.markdown("""
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        
-        html, body, [class*="css"] {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        
-        /* Global Background */
-        .stApp {
-            background-color: #f8fafc;
-        }
-        
-        /* Magic Image Targeting (Fixes the TypeError) */
-        [data-testid="stImage"] img {
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        [data-testid="stImage"] img:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.12);
-        }
+# ---------------------------------------------------------
+# Page setup (must be the first Streamlit command)
+# ---------------------------------------------------------
+st.set_page_config(
+    page_title=f"{APP_NAME} — Smart Phytopathology System",
+    page_icon="🌿",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-        /* Animated Hero Banner */
-        .hero-banner {
-            background: linear-gradient(120deg, #064e3b 0%, #047857 50%, #10b981 100%);
-            padding: 2.5rem 3rem;
-            border-radius: 20px;
-            color: white;
-            margin-bottom: 2rem;
-            box-shadow: 0 15px 30px rgba(4, 120, 87, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .hero-banner h1 { margin: 0; font-weight: 800; font-size: 2.8rem; letter-spacing: -1px; }
-        .hero-banner p { margin: 5px 0 0 0; font-size: 1.1rem; opacity: 0.9; }
-        
-        /* Streamlit Tabs Styling */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 24px;
-            background-color: white;
-            padding: 10px 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-        }
-        .stTabs [data-baseweb="tab"] {
-            height: 50px;
-            white-space: pre-wrap;
-            background-color: transparent;
-            border-radius: 8px;
-            color: #64748b;
-            font-weight: 600;
-        }
-        .stTabs [aria-selected="true"] {
-            color: #047857 !important;
-            background-color: #ecfdf5 !important;
-        }
+import numpy as np
+from PIL import Image
 
-        /* Status Cards */
-        .status-healthy {
-            background: #dcfce7;
-            border-left: 6px solid #22c55e;
-            color: #14532d;
-            padding: 1.5rem;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-        .status-warning {
-            background: #fef2f2;
-            border-left: 6px solid #ef4444;
-            color: #7f1d1d;
-            padding: 1.5rem;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-        .status-error {
-            background: #fffbeb;
-            border-left: 6px solid #f59e0b;
-            color: #92400e;
-            padding: 1.5rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-        }
-        
-        /* File Uploader Hover */
-        [data-testid="stFileUploadDropzone"] {
-            border: 2px dashed #6ee7b7;
-            border-radius: 20px;
-            background-color: #ffffff;
-            transition: all 0.3s ease;
-        }
-        [data-testid="stFileUploadDropzone"]:hover {
-            border-color: #10b981;
-            background-color: #ecfdf5;
-        }
-    </style>
-""", unsafe_allow_html=True)
+from model import load_all_models, model_stamp, predict_cached
+from ui import (
+    render, inject_css, init_state, log_scan,
+    verdict_card, probability_bars, build_report,
+)
 
-# Custom Progress Bar HTML
-def render_progress_bar(label, percentage, is_healthy=False):
-    color = "#10b981" if is_healthy else "#ef4444"
-    if percentage < 15: color = "#cbd5e1"
-    
-    return f"""
-    <div style="margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <span style="font-weight: 600; color: #334155;">{label}</span>
-            <span style="font-weight: 700; color: {color};">{percentage:.1f}%</span>
-        </div>
-        <div style="width: 100%; background-color: #e2e8f0; border-radius: 99px; height: 10px;">
-            <div style="background-color: {color}; height: 100%; border-radius: 99px; width: {percentage}%;"></div>
-        </div>
-    </div>
-    """
+inject_css()
+init_state()
+
+
+def show_image(img):
+    """Full-width image that works on old and new Streamlit versions."""
+    try:
+        st.image(img, width="stretch")
+    except Exception:
+        st.image(img, use_container_width=True)
+
+
+def clear_history():
+    st.session_state.history = []
+
 
 # ---------------------------------------------------------
-# 2. CONSTANTS & METADATA (Logic Untouched)
-# ---------------------------------------------------------
-CONFIDENCE_THRESHOLD = 65.0
-
-CLASS_NAMES = [
-    "Tomato Bacterial Spot",
-    "Tomato Early Blight",
-    "Tomato Late Blight",
-    "Tomato Healthy"
-]
-
-DIAGNOSTIC_GUIDE = {
-    "Tomato Bacterial Spot": {
-        "description": "Triggered by *Xanthomonas* bacteria. Symptoms include small, water-soaked dark spots on foliage that quickly enlarge and yellow surrounding tissue.",
-        "action": "Avoid overhead irrigation, apply copper-based bactericides early, and discard infected foliage to prevent spores spreading via water splash."
-    },
-    "Tomato Early Blight": {
-        "description": "Fungal infection caused by *Alternaria solani*. Characterized by distinct concentric target-like rings on mature leaf surfaces.",
-        "action": "Ensure adequate plant spacing for airflow, stake foliage off soil, and treat proactively with suitable organic or chemical fungicides."
-    },
-    "Tomato Late Blight": {
-        "description": "Devastating water-mold infection caused by *Phytophthora infestans*. Causes rapidly spreading grayish-green dark foliage decay in cool, wet environments.",
-        "action": "Immediately prune and dispose of infected leaves. Maintain low ambient humidity in greenhouses and apply preventive systemic fungicides."
-    },
-    "Tomato Healthy": {
-        "description": "Foliage exhibits rich chlorophyll saturation, standard vascular structure, and no signs of bacterial or fungal pathogen colonization.",
-        "action": "Maintain optimal irrigation cycles, routine nitrogen balance, and continue periodic pest monitoring."
-    }
-}
-
-PREDICT_TRANSFORM = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]
-    )
-])
-
-# ---------------------------------------------------------
-# 3. MODEL ARCHITECTURE & LOADERS (Logic Untouched)
-# ---------------------------------------------------------
-def get_resnet18_model(num_classes=4):
-    model = models.resnet18(weights=None)
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, num_classes)
-    return model
-
-@st.cache_resource
-def load_all_models():
-    device = torch.device("cpu")
-    model_1 = get_resnet18_model(num_classes=4)
-    path_1 = "best_custom_cnn.pth"
-    if os.path.exists(path_1):
-        model_1.load_state_dict(torch.load(path_1, map_location=device))
-        model_1.eval()
-    else: model_1 = None
-
-    model_2 = get_resnet18_model(num_classes=4)
-    path_2 = "best_resnet18.pth"
-    if os.path.exists(path_2):
-        model_2.load_state_dict(torch.load(path_2, map_location=device))
-        model_2.eval()
-    else: model_2 = None
-
-    return model_1, model_2
-
-# ---------------------------------------------------------
-# 4. INTERACTIVE SIDEBAR DASHBOARD
+# Sidebar
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown("### 🎛️ Control Center")
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Styled Radio instead of Selectbox for better UX
-    selected_model_name = st.radio(
+    selected_engine = st.radio(
         "Select Inference Engine",
-        ["Primary Engine (CNN)", "Secondary Engine (ResNet)", "Dual Benchmark Mode"],
+        [ENGINE_1_LABEL, ENGINE_2_LABEL, DUAL_LABEL],
         index=0,
-        help="Switching engines changes the background AI model in real-time."
+        help="Switching engines changes the background AI model in real-time.",
     )
-    
+
     st.markdown("---")
     st.markdown("### 📡 System Status")
-    
-    # Interactive Dashboard Metrics
-    col1, col2 = st.columns(2)
-    col1.metric("Safety Threshold", f"{CONFIDENCE_THRESHOLD}%", "Active")
-    col2.metric("Compute Node", "CPU", "Ready")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Hide details in an expander for clean UI
-    with st.expander("🛠️ View Engine Specifications"):
-        st.write("**Dataset:** Balanced Tomato Sets")
-        st.write("**Resolution:** 224x224 RGB")
-        st.write("**Outputs:** 4 Health States")
+    c1, c2 = st.columns(2)
+    c1.metric("Threshold", f"{CONFIDENCE_THRESHOLD:.0f}%", "Active")
+    c2.metric("Compute", "CPU", "Ready")
 
-model_1, model_2 = load_all_models()
-if model_1 is None or model_2 is None:
-    st.error("⚠️ **System Offline:** Model checkpoints not found. Please place both `.pth` files next to `app.py`.")
+    with st.expander("🛠️ Engine Specifications"):
+        st.write("**Dataset:** Balanced Tomato Sets")
+        st.write(f"**Resolution:** {INPUT_SIZE}x{INPUT_SIZE} RGB")
+        st.write(f"**Outputs:** {NUM_CLASSES} Health States")
+
+    with st.expander("📸 Photo Tips", expanded=True):
+        st.write("• Use natural daylight")
+        st.write("• Fill the frame with one leaf")
+        st.write("• Keep the leaf flat and in focus")
+
+# ---------------------------------------------------------
+# Load models (reloads automatically when a .pth file changes)
+# ---------------------------------------------------------
+model_1, model_2, load_errors = load_all_models(model_stamp())
+if load_errors or model_1 is None or model_2 is None:
+    st.error(
+        "⚠️ **System Offline:** the model checkpoints could not be loaded. "
+        f"Please place `{PATH_1.name}` and `{PATH_2.name}` next to `app.py`."
+    )
+    for message in load_errors:
+        st.warning(message)
     st.stop()
 
 # ---------------------------------------------------------
-# 5. MAIN DASHBOARD UI
+# Hero
 # ---------------------------------------------------------
-st.markdown("""
-    <div class="hero-banner">
-        <div>
-            <h1>FloraScan AI</h1>
-            <p>Smart Phytopathology & Diagnostic Engine</p>
-        </div>
-        <div style="font-size: 3rem; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 50%;">🌿</div>
+render(f"""
+<div class="hero">
+    <h1>{escape(APP_NAME)}</h1>
+    <p>{escape(APP_TAGLINE)}</p>
+    <span class="chip">{CROP_EMOJI} {NUM_CLASSES} Health States</span>
+    <span class="chip">⚡ Real-time Inference</span>
+    <span class="chip">🧠 Dual Engine Validation</span>
+    <span class="chip">🛡️ {CONFIDENCE_THRESHOLD:.0f}% Safety Threshold</span>
+</div>
+""")
+
+tab_scan, tab_lib, tab_hist = st.tabs(["🔬  Scan Leaf", "📚  Disease Library", "🕘  Scan History"])
+
+# ---------------------------------------------------------
+# Scan tab
+# ---------------------------------------------------------
+with tab_scan:
+    left, right = st.columns([1, 1.35], gap="large")
+
+    sample = None   # {"name": str, "bytes": bytes}
+    image = None
+
+    with left:
+        render('<div class="section-title">📥 Upload Leaf Sample</div>')
+        uploaded_file = st.file_uploader(
+            "Drop a leaf sample here for instant analysis",
+            type=["jpg", "jpeg", "png"],
+            label_visibility="collapsed",
+            key="leaf_uploader",
+        )
+        if uploaded_file is not None:
+            try:
+                sample = {"name": uploaded_file.name, "bytes": uploaded_file.getvalue()}
+                image = Image.open(io.BytesIO(sample["bytes"])).convert("RGB")
+                show_image(image)
+                render(f'<p class="muted" style="text-align:center;margin-top:8px;">📄 {escape(sample["name"])} · {image.size[0]}×{image.size[1]} px</p>')
+            except Exception:
+                sample = None
+                image = None
+                st.error("😕 We couldn't read that image. Please upload a valid JPG or PNG file.")
+
+    with right:
+        if image is None:
+            render("""
+            <div class="glass">
+                <div class="section-title">✨ How it works</div>
+                <div class="step"><div class="num">1</div><div><b>Upload a leaf photo</b><br><span class="muted">Drag & drop a JPG or PNG on the left.</span></div></div>
+                <div class="step"><div class="num">2</div><div><b>AI analyzes the leaf</b><br><span class="muted">Your chosen engine reads color, texture and lesion patterns.</span></div></div>
+                <div class="step"><div class="num">3</div><div><b>Get a clear action plan</b><br><span class="muted">See the diagnosis, confidence, and what to do next.</span></div></div>
+            </div>
+            <div class="glass" style="background:linear-gradient(135deg,#ecfdf5,#e0f2fe);">
+                <div class="section-title">🌤️ Waiting for your leaf…</div>
+                <p class="muted">Tip: switch to <b>Dual Benchmark Mode</b> in the sidebar to compare both engines side by side.</p>
+            </div>
+            """)
+        else:
+            file_name = sample["name"]
+            file_id = f"{file_name}-{len(sample['bytes'])}"
+            stamp = model_stamp()
+            new_scan = False
+
+            if selected_engine != DUAL_LABEL:
+                # ---------------- SINGLE ENGINE ----------------
+                use_engine_1 = selected_engine == ENGINE_1_LABEL
+                engine_label = ENGINE_1_LABEL if use_engine_1 else ENGINE_2_LABEL
+
+                with st.spinner("Analyzing leaf…"):
+                    probabilities = predict_cached(sample["bytes"], 1 if use_engine_1 else 2, stamp)
+
+                pred_class = CLASS_NAMES[int(np.argmax(probabilities))]
+                confidence = float(np.max(probabilities) * 100)
+                is_confident = confidence >= CONFIDENCE_THRESHOLD
+
+                new_scan = log_scan(
+                    f"{file_id}-{engine_label}", file_name, engine_label,
+                    pred_class if is_confident else "Unrecognized", confidence,
+                )
+
+                verdict_card(pred_class, confidence)
+
+                if not is_confident:
+                    with st.expander("📊 See raw probability distribution"):
+                        probability_bars(probabilities)
+                else:
+                    guide = get_guide(pred_class)
+                    t_diag, t_metrics = st.tabs(["🩺 Diagnosis & Action Plan", "📊 Confidence Metrics"])
+
+                    with t_diag:
+                        st.info(f"**Description:** {guide['description']}")
+                        st.success(f"**Action Plan:** {guide['action']}")
+                        st.download_button(
+                            "⬇️ Download diagnosis report",
+                            data=build_report(file_name, engine_label, pred_class, confidence),
+                            file_name=f"florascan_report_{pred_class.replace(' ', '_').lower()}.txt",
+                            mime="text/plain",
+                            key=f"dl-{file_id}-{engine_label}",
+                        )
+
+                    with t_metrics:
+                        render('<div class="section-title">Probability Distribution</div>')
+                        probability_bars(probabilities)
+            else:
+                # ---------------- DUAL BENCHMARK ----------------
+                with st.spinner("Running both engines…"):
+                    prob_1 = predict_cached(sample["bytes"], 1, stamp)
+                    prob_2 = predict_cached(sample["bytes"], 2, stamp)
+
+                conf_1 = float(np.max(prob_1) * 100)
+                conf_2 = float(np.max(prob_2) * 100)
+                cls_1 = CLASS_NAMES[int(np.argmax(prob_1))]
+                cls_2 = CLASS_NAMES[int(np.argmax(prob_2))]
+
+                n1 = log_scan(f"{file_id}-engine1", file_name, ENGINE_1_SHORT,
+                              cls_1 if conf_1 >= CONFIDENCE_THRESHOLD else "Unrecognized", conf_1)
+                n2 = log_scan(f"{file_id}-engine2", file_name, ENGINE_2_SHORT,
+                              cls_2 if conf_2 >= CONFIDENCE_THRESHOLD else "Unrecognized", conf_2)
+                new_scan = n1 or n2
+
+                both_sure = conf_1 >= CONFIDENCE_THRESHOLD and conf_2 >= CONFIDENCE_THRESHOLD
+                if both_sure and cls_1 == cls_2:
+                    banner_bg, banner_color = "#dcfce7", "#14532d"
+                    banner_text = f"🤝 Both engines agree: <b>{escape(cls_1)}</b>"
+                elif both_sure:
+                    banner_bg, banner_color = "#fef2f2", "#7f1d1d"
+                    banner_text = "⚖️ Engines disagree. Please review the sample manually."
+                else:
+                    banner_bg, banner_color = "#fffbeb", "#92400e"
+                    banner_text = "🔎 At least one engine has low confidence. Try a clearer photo."
+
+                render(f"""
+                <div class="glass" style="background:{banner_bg}; color:{banner_color}; font-weight:600; padding:1rem 1.3rem;">
+                    {banner_text}
+                </div>
+                """)
+
+                col_a, col_b = st.columns(2, gap="medium")
+                with col_a:
+                    render(f'<div class="section-title">🔹 {escape(ENGINE_1_SHORT)} Engine</div>')
+                    verdict_card(cls_1, conf_1, compact=True)
+                    with st.expander(f"View {ENGINE_1_SHORT} Probabilities"):
+                        probability_bars(prob_1)
+                with col_b:
+                    render(f'<div class="section-title">🔸 {escape(ENGINE_2_SHORT)} Engine</div>')
+                    verdict_card(cls_2, conf_2, compact=True)
+                    with st.expander(f"View {ENGINE_2_SHORT} Probabilities"):
+                        probability_bars(prob_2)
+
+            if new_scan:
+                st.toast("Analysis complete — saved to history", icon="✅")
+
+# ---------------------------------------------------------
+# Disease library tab
+# ---------------------------------------------------------
+with tab_lib:
+    render("""
+    <div class="glass">
+        <div class="section-title">📚 Know your leaf conditions</div>
+        <p class="muted">The health states FloraScan can recognize, with telltale signs and recommended care.</p>
     </div>
-""", unsafe_allow_html=True)
+    """)
+    lib_cols = st.columns(2, gap="large")
+    for idx, name in enumerate(CLASS_NAMES):
+        meta = get_meta(name)
+        guide = get_guide(name)
+        signs_html = "".join(f'<span class="sig">{escape(s)}</span>' for s in meta["signs"])
+        with lib_cols[idx % 2]:
+            render(f"""
+            <div class="lib" style="border-top:5px solid {meta['tone']};">
+                <div class="icon">{meta['icon']}</div>
+                <h3>{escape(name)}</h3>
+                <span class="tag" style="background:{meta['tone']}22; color:{meta['tone']};">{escape(meta['kind']).upper()} · SEVERITY: {escape(meta['severity']).upper()}</span>
+                <p class="muted" style="margin-top:8px;">{meta['desc_html']}</p>
+                <div>{signs_html}</div>
+                <div class="act"><b>Recommended action:</b> {escape(guide['action'])}</div>
+            </div>
+            """)
 
-uploaded_file = st.file_uploader("📥 Drop a leaf sample here for instant analysis", type=["jpg", "jpeg", "png"])
+# ---------------------------------------------------------
+# History tab
+# ---------------------------------------------------------
+with tab_hist:
+    top_l, top_r = st.columns([4, 1])
+    with top_l:
+        render('<div class="section-title">🕘 Scans this session</div>')
+    with top_r:
+        if st.session_state.history:
+            st.button("🧹 Clear history", key="clear_history", on_click=clear_history)
 
-if uploaded_file:
-    image = Image.open(uploaded_file).convert("RGB")
-    input_tensor = PREDICT_TRANSFORM(image).unsqueeze(0)
-
-    if selected_model_name != "Dual Benchmark Mode":
-        # SINGLE ENGINE INTERACTIVE VIEW
-        col_img, col_results = st.columns([1, 1.5], gap="large")
-
-        with col_img:
-            # The CSS above automatically handles the styling of this image safely
-            st.image(image, use_container_width=True)
-
-        with col_results:
-            active_model = model_1 if "CNN" in selected_model_name else model_2
-            with torch.no_grad():
-                probabilities = F.softmax(active_model(input_tensor)[0], dim=0).numpy()
-
-            pred_class = CLASS_NAMES[np.argmax(probabilities)]
-            confidence = float(np.max(probabilities) * 100)
-
-            if confidence < CONFIDENCE_THRESHOLD:
-                st.markdown(f"""
-                    <div class="status-error">
-                        <b>⚠️ Unrecognized Sample Detected</b><br>
-                        Engine confidence is extremely low ({confidence:.1f}%). This does not match our leaf database.
-                    </div>
-                """, unsafe_allow_html=True)
-            else:
-                # Interactive Tabs for Results
-                tab_diag, tab_metrics = st.tabs(["🩺 Diagnosis & Action Plan", "📊 Confidence Metrics"])
-                
-                with tab_diag:
-                    if pred_class == "Tomato Healthy":
-                        st.markdown(f'<div class="status-healthy">✅ {pred_class} <span style="float:right; opacity:0.8;">{confidence:.1f}% Match</span></div>', unsafe_allow_html=True)
-                    else:
-                        st.markdown(f'<div class="status-warning">⚠️ {pred_class} <span style="float:right; opacity:0.8;">{confidence:.1f}% Match</span></div>', unsafe_allow_html=True)
-                    
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    st.info(f"**Description:** {DIAGNOSTIC_GUIDE[pred_class]['description']}")
-                    st.success(f"**Action Plan:** {DIAGNOSTIC_GUIDE[pred_class]['action']}")
-
-                with tab_metrics:
-                    st.markdown("### Probability Distribution")
-                    for i, name in enumerate(CLASS_NAMES):
-                        score = float(probabilities[i]) * 100
-                        st.markdown(render_progress_bar(name, score, name=="Tomato Healthy"), unsafe_allow_html=True)
-
+    if not st.session_state.history:
+        render("""
+        <div class="glass" style="text-align:center;">
+            <div style="font-size:2.5rem;">🍃</div>
+            <p class="muted">No scans yet. Upload a leaf in the Scan tab and your results will appear here.</p>
+        </div>
+        """)
     else:
-        # DUAL BENCHMARK INTERACTIVE VIEW
-        st.markdown("<h3 style='text-align: center; color: #1e293b; margin-bottom: 2rem;'>⚔️ Live Dual-Engine Cross-Validation</h3>", unsafe_allow_html=True)
-        
-        col_img1, col_img2, col_img3 = st.columns([1, 2, 1])
-        with col_img2: st.image(image, use_container_width=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        with torch.no_grad():
-            prob_1 = F.softmax(model_1(input_tensor)[0], dim=0).numpy()
-            prob_2 = F.softmax(model_2(input_tensor)[0], dim=0).numpy()
-
-        col_a, col_b = st.columns(2, gap="large")
-
-        # Engine 1 interactive container
-        with col_a:
-            st.markdown("#### 🔹 Custom CNN Engine")
-            conf_1 = float(np.max(prob_1) * 100)
-            res_class_1 = CLASS_NAMES[np.argmax(prob_1)]
-            
-            if conf_1 < CONFIDENCE_THRESHOLD:
-                st.markdown(f"<div class='status-error'>⚠️ Low Confidence ({conf_1:.1f}%)</div>", unsafe_allow_html=True)
+        for item in reversed(st.session_state.history):
+            if item["label"] in CLASS_NAMES:
+                tone = get_meta(item["label"])["tone"]
             else:
-                cls = "status-healthy" if res_class_1 == "Tomato Healthy" else "status-warning"
-                st.markdown(f'<div class="{cls}" style="padding: 1rem;">{res_class_1}<br><small>{conf_1:.1f}%</small></div>', unsafe_allow_html=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            with st.expander("View CNN Probabilities"):
-                for i, name in enumerate(CLASS_NAMES):
-                    st.markdown(render_progress_bar(name, float(prob_1[i]) * 100, name=="Tomato Healthy"), unsafe_allow_html=True)
+                tone = UNKNOWN_TONE
+            render(f"""
+            <div class="hist">
+                <div class="dot" style="background:{tone};"></div>
+                <div style="flex:1;">
+                    <b style="color:#0f172a;">{escape(item['label'])}</b><br>
+                    <span class="muted">{escape(item['file'])} · {escape(item['engine'])}</span>
+                </div>
+                <div style="text-align:right;">
+                    <b style="color:{tone};">{item['conf']:.1f}%</b><br>
+                    <span class="muted">{item['time']}</span>
+                </div>
+            </div>
+            """)
 
-        # Engine 2 interactive container
-        with col_b:
-            st.markdown("#### 🔸 ResNet18 Engine")
-            conf_2 = float(np.max(prob_2) * 100)
-            res_class_2 = CLASS_NAMES[np.argmax(prob_2)]
-            
-            if conf_2 < CONFIDENCE_THRESHOLD:
-                st.markdown(f"<div class='status-error'>⚠️ Low Confidence ({conf_2:.1f}%)</div>", unsafe_allow_html=True)
-            else:
-                cls = "status-healthy" if res_class_2 == "Tomato Healthy" else "status-warning"
-                st.markdown(f'<div class="{cls}" style="padding: 1rem;">{res_class_2}<br><small>{conf_2:.1f}%</small></div>', unsafe_allow_html=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            with st.expander("View ResNet Probabilities"):
-                for i, name in enumerate(CLASS_NAMES):
-                    st.markdown(render_progress_bar(name, float(prob_2[i]) * 100, name=="Tomato Healthy"), unsafe_allow_html=True)
-else:
-    # Interactive Empty State
-    st.info("👋 **Welcome to FloraScan AI.** Waiting for your leaf upload above to begin diagnostics.")
+render(f'<div class="footnote">{escape(APP_NAME)} provides AI-assisted guidance. Confirm critical decisions with an agronomist.</div>')
