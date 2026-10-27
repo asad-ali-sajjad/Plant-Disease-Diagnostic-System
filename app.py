@@ -1,9 +1,14 @@
+"""
+app.py — Main Streamlit application for FloraScan AI.
+"""
 import io
 from html import escape
 
+import numpy as np
+from PIL import Image
 import streamlit as st
 
-# config.py has no Streamlit calls, so it is safe to import before set_page_config
+# config.py imports
 from config import (
     APP_NAME, APP_TAGLINE, CROP_EMOJI,
     CLASS_NAMES, NUM_CLASSES, CONFIDENCE_THRESHOLD, INPUT_SIZE,
@@ -13,7 +18,7 @@ from config import (
 )
 
 # ---------------------------------------------------------
-# Page setup (must be the first Streamlit command)
+# Page Setup (must be the first Streamlit command)
 # ---------------------------------------------------------
 st.set_page_config(
     page_title=f"{APP_NAME} — Smart Phytopathology System",
@@ -21,9 +26,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
-import numpy as np
-from PIL import Image
 
 from model import load_all_models, model_stamp, predict_cached
 from ui import (
@@ -36,11 +38,11 @@ init_state()
 
 
 def show_image(img):
-    """Full-width image that works on old and new Streamlit versions."""
+    """Full-width image renderer compatible with standard Streamlit versions."""
     try:
-        st.image(img, width="stretch")
-    except Exception:
         st.image(img, use_container_width=True)
+    except TypeError:
+        st.image(img, use_column_width=True)
 
 
 def clear_history():
@@ -48,7 +50,7 @@ def clear_history():
 
 
 # ---------------------------------------------------------
-# Sidebar
+# Sidebar Control Center
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown("### 🎛️ Control Center")
@@ -66,7 +68,7 @@ with st.sidebar:
     c2.metric("Compute", "CPU", "Ready")
 
     with st.expander("🛠️ Engine Specifications"):
-        st.write("**Dataset:** Balanced Tomato Sets")
+        st.write("**Dataset:** Balanced 5-Class Set (4 Tomato + 1 Not_Leaf)")
         st.write(f"**Resolution:** {INPUT_SIZE}x{INPUT_SIZE} RGB")
         st.write(f"**Outputs:** {NUM_CLASSES} Health States")
 
@@ -76,7 +78,7 @@ with st.sidebar:
         st.write("• Keep the leaf flat and in focus")
 
 # ---------------------------------------------------------
-# Load models (reloads automatically when a .pth file changes)
+# Model Loader Verification
 # ---------------------------------------------------------
 model_1, model_2, load_errors = load_all_models(model_stamp())
 if load_errors or model_1 is None or model_2 is None:
@@ -89,7 +91,7 @@ if load_errors or model_1 is None or model_2 is None:
     st.stop()
 
 # ---------------------------------------------------------
-# Hero
+# Hero Banner
 # ---------------------------------------------------------
 render(f"""
 <div class="hero">
@@ -105,7 +107,7 @@ render(f"""
 tab_scan, tab_lib, tab_hist = st.tabs(["🔬  Scan Leaf", "📚  Disease Library", "🕘  Scan History"])
 
 # ---------------------------------------------------------
-# Scan tab
+# Scan Tab
 # ---------------------------------------------------------
 with tab_scan:
     left, right = st.columns([1, 1.35], gap="large")
@@ -117,7 +119,7 @@ with tab_scan:
         render('<div class="section-title">📥 Upload Leaf Sample</div>')
         uploaded_file = st.file_uploader(
             "Drop a leaf sample here for instant analysis",
-            type=["jpg", "jpeg", "png"],
+            type=["jpg", "jpeg", "png", "webp"],
             label_visibility="collapsed",
             key="leaf_uploader",
         )
@@ -130,7 +132,7 @@ with tab_scan:
             except Exception:
                 sample = None
                 image = None
-                st.error("😕 We couldn't read that image. Please upload a valid JPG or PNG file.")
+                st.error("😕 We couldn't read that image. Please upload a valid JPG, PNG, or WEBP file.")
 
     with right:
         if image is None:
@@ -179,8 +181,13 @@ with tab_scan:
                     t_diag, t_metrics = st.tabs(["🩺 Diagnosis & Action Plan", "📊 Confidence Metrics"])
 
                     with t_diag:
-                        st.info(f"**Description:** {guide['description']}")
-                        st.success(f"**Action Plan:** {guide['action']}")
+                        if pred_class == "Non Leaf":
+                            st.warning(f"**Notice:** {guide['description']}")
+                            st.info(f"**Recommendation:** {guide['action']}")
+                        else:
+                            st.info(f"**Description:** {guide['description']}")
+                            st.success(f"**Action Plan:** {guide['action']}")
+
                         st.download_button(
                             "⬇️ Download diagnosis report",
                             data=build_report(file_name, engine_label, pred_class, confidence),
@@ -211,8 +218,12 @@ with tab_scan:
 
                 both_sure = conf_1 >= CONFIDENCE_THRESHOLD and conf_2 >= CONFIDENCE_THRESHOLD
                 if both_sure and cls_1 == cls_2:
-                    banner_bg, banner_color = "#dcfce7", "#14532d"
-                    banner_text = f"🤝 Both engines agree: <b>{escape(cls_1)}</b>"
+                    if cls_1 == "Non Leaf":
+                        banner_bg, banner_color = "#f1f5f9", "#334155"
+                        banner_text = "📷 Both engines agree: <b>Non-leaf object detected</b>"
+                    else:
+                        banner_bg, banner_color = "#dcfce7", "#14532d"
+                        banner_text = f"🤝 Both engines agree: <b>{escape(cls_1)}</b>"
                 elif both_sure:
                     banner_bg, banner_color = "#fef2f2", "#7f1d1d"
                     banner_text = "⚖️ Engines disagree. Please review the sample manually."
@@ -242,7 +253,7 @@ with tab_scan:
                 st.toast("Analysis complete — saved to history", icon="✅")
 
 # ---------------------------------------------------------
-# Disease library tab
+# Disease Library Tab
 # ---------------------------------------------------------
 with tab_lib:
     render("""
@@ -269,7 +280,7 @@ with tab_lib:
             """)
 
 # ---------------------------------------------------------
-# History tab
+# Scan History Tab
 # ---------------------------------------------------------
 with tab_hist:
     top_l, top_r = st.columns([4, 1])
