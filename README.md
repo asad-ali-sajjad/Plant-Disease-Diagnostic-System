@@ -10,7 +10,7 @@
 
 *A dual-engine computer vision dashboard that classifies tomato leaf health in seconds, and refuses to guess when it is unsure.*
 
-[**Live Demo**](YOUR_APP_URL) · [**Project Report (PDF)**](docs/FloraScan_AI_Project_Report.pdf) · [**Presentation**](docs/FloraScan_AI_Presentation.pptx) · [**Training Notebook**](Plant_Disease_Detection_V2.ipynb)
+[**Live Demo**](https://plant-disease-diagnostic-system.streamlit.app) · [**Project Report (PDF)**](docs/FloraScan_AI_Project_Report.pdf) · [**Presentation**](docs/FloraScan_AI_Presentation.pptx) · [**Training Notebook**](Plant_Disease_Detection_V2.ipynb)
 
 </div>
 
