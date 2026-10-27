@@ -1,36 +1,103 @@
 <div align="center">
 
 # 🌿 FloraScan AI
-### Intelligent Plant Disease Diagnostic System
+### Smart Phytopathology System: Tomato Leaf Disease Diagnosis
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)]()
 [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)]()
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)]()
+[![Accuracy](https://img.shields.io/badge/Test%20Accuracy-96.53%25-059669?style=for-the-badge)]()
 
-*A real-time computer vision dashboard for precision agriculture and crop health monitoring.*
+*A dual-engine computer vision dashboard that classifies tomato leaf health in seconds, and refuses to guess when it is unsure.*
+
+[**Live Demo**](YOUR_APP_URL) · [**Project Report (PDF)**](docs/FloraScan_AI_Project_Report.pdf) · [**Presentation**](docs/FloraScan_AI_Presentation.pptx) · [**Training Notebook**](Plant_Disease_Detection_V2.ipynb)
 
 </div>
 
 <br>
 
-> **FloraScan AI** empowers farmers and botanists by accurately diagnosing plant leaf health and classifying agricultural crop diseases instantly using state-of-the-art Deep Learning architectures.
+> **FloraScan AI** takes a photo of a single tomato leaf and diagnoses it as **Healthy**, **Bacterial Spot**, **Early Blight**, **Late Blight**, or **Not Leaf**, using two deep learning models that can be run individually or compared side by side.
+
+---
+
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="assets/screenshots/01-home.png" alt="Home and scan tab"><br><sub><b>Home:</b> upload a leaf and pick an engine</sub></td>
+    <td width="50%"><img src="assets/screenshots/02-diagnosis.png" alt="Diagnosis with confidence gauge"><br><sub><b>Diagnosis:</b> verdict, confidence gauge, and action plan</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="assets/screenshots/03-dual-benchmark.png" alt="Dual benchmark mode"><br><sub><b>Dual Benchmark:</b> both engines compared on one leaf</sub></td>
+    <td width="50%"><img src="assets/screenshots/04-unrecognized.png" alt="Unrecognized low-confidence result"><br><sub><b>Safety threshold:</b> low confidence is flagged, not guessed</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="assets/screenshots/05-disease-library.png" alt="Disease library"><br><sub><b>Disease Library:</b> signs, severity, and care</sub></td>
+    <td width="50%"><img src="assets/screenshots/06-history.png" alt="Scan history"><br><sub><b>Scan History:</b> session log of every analysis</sub></td>
+  </tr>
+</table>
+
+---
+
+## 📊 Results at a Glance
+
+Both models were trained for 10 epochs on the same data and evaluated once on a **held-out test set of 750 images**.
+
+| Engine | Approach | Trainable params | Test accuracy | Correct |
+|---|---|---|---|---|
+| 🧠 **Custom 3-Block CNN** | Trained from scratch | ~51.5 M | **96.53%** | 724 / 750 |
+| 🧠 **ResNet-18** | Transfer learning, frozen backbone | 2,565 | **94.13%** | 706 / 750 |
+
+<div align="center">
+  <img src="assets/accuracy_curves.png" alt="Training and validation accuracy" width="70%">
+</div>
+
+> The custom CNN makes about 41% fewer mistakes (26 vs 44). ResNet-18 had its backbone frozen, so this compares a fully trained model with a feature-extraction baseline, not a fine-tuned ResNet.
 
 ---
 
 ## ✨ Key Features
 
-* 🧠 **Multi-Engine Inference:** Toggle between two backend models in real-time:
-  * **Custom 3-Block CNN:** Lightweight architecture achieving **95.83% Accuracy**.
-  * **ResNet18:** Transfer learning model achieving **94.00% Accuracy**.
+* 🧠 **Multi-Engine Inference:** Switch between the Custom CNN, ResNet-18, or Dual Benchmark mode from the sidebar.
 * ⚖️ **Dual Benchmark Mode:** Run both engines on the same leaf and see whether they agree, disagree, or are unsure.
-* 📊 **Visual Confidence Metrics:** Circular confidence gauge and animated probability bars for every prediction.
-* 🛡️ **Safety Threshold:** Predictions below 65% confidence are flagged as "Unrecognized" instead of guessed.
-* 📚 **Disease Library:** Built-in reference cards with signs, severity, and recommended care for each condition.
-* 🕘 **Scan History:** Session log of every analysis, with a one-click clear.
+* 🛡️ **Safety Threshold:** Predictions below **65%** confidence are shown as "Unrecognized" instead of being guessed.
+* 🚫 **Out-of-Distribution Class:** A synthetic *Not Leaf* class helps reject clearly non-leaf uploads.
+* 📊 **Visual Confidence Metrics:** Confidence gauge and probability bars across all five classes.
+* 📚 **Disease Library:** Reference cards with signs, severity, and recommended care.
+* 🕘 **Scan History:** Session log of every analysis, with one-click clear.
 * ⬇️ **Downloadable Reports:** Export a text diagnosis report for any confident result.
-* 🎨 **Calm, Modern Interface:** Large tab navigation, glass-style cards, and smooth animations.
-* ⚡ **Fast & Safe:** Cached predictions, automatic reload when model files change, and friendly error messages for bad images or missing checkpoints.
-* 🧩 **Modular & Scalable Design:** Built for easy retraining and multi-crop expansion. *(Currently active module: Solanaceae / Tomato pathology)*.
+* ⚡ **Fast & Robust:** Cached predictions, automatic reload when model files change, and friendly errors for bad images or missing checkpoints.
+* 🧩 **Modular Design:** Built for easy retraining and multi-crop expansion *(currently active: tomato)*.
+
+---
+
+## 🗂️ Dataset
+
+Built from the [PlantVillage](https://arxiv.org/abs/1511.08060) corpus (20,638 images, 15 categories) and balanced to **1,000 images per class**:
+
+| Class | Images | Source |
+|---|---|---|
+| Tomato Healthy | 1,000 | PlantVillage |
+| Tomato Bacterial Spot | 1,000 | PlantVillage |
+| Tomato Early Blight | 1,000 | PlantVillage |
+| Tomato Late Blight | 1,000 | PlantVillage |
+| Not Leaf | 1,000 | Synthetic (noise, gradients, checkerboards, shapes) |
+
+* **Split:** 70 / 15 / 15 → 3,500 train, 750 validation, 750 test (seeded random split, seed 42).
+* **Training augmentation:** random horizontal flip and rotation up to 15°.
+* **Input:** 224 × 224 RGB with ImageNet normalization.
+
+---
+
+## 🏗️ Model Architectures
+
+**Custom 3-Block CNN (`CustomPlantCNN`)**
+`Conv(3→32) → Conv(32→64) → Conv(64→128)`, each followed by BatchNorm, ReLU and 2×2 MaxPool, then Dropout(0.25) → `Linear(100,352→512)` + BatchNorm + ReLU + Dropout(0.25) → `Linear(512→5)`.
+
+**ResNet-18 (transfer learning)**
+ImageNet-pretrained backbone with all convolutional layers frozen and a new `Linear(512→5)` head.
+
+**Training setup:** Adam (lr 0.001), cross-entropy loss, batch size 32, 10 epochs on an NVIDIA T4 GPU. The best checkpoint by validation accuracy is kept.
 
 ---
 
@@ -38,31 +105,36 @@
 
 ```text
 FloraScan-AI/
-├── 🖥️ app.py                  # Streamlit interface: sidebar, tabs, page flow
-├── ⚙️ config.py               # Classes, paths, threshold, labels, disease info (edit this to retrain)
-├── 🧠 model.py                # Model building, loading, cached prediction
-├── 🎨 ui.py                   # HTML components: result cards, probability bars, reports
-├── 💅 styles.css              # All visual styling
+├── 🖥️ app.py                          # Streamlit interface: sidebar, tabs, page flow
+├── ⚙️ config.py                       # Classes, paths, threshold, labels, disease info
+├── 🧠 model.py                        # Model building, loading, cached prediction
+├── 🎨 ui.py                           # HTML components: result cards, probability bars, reports
+├── 💅 styles.css                      # All visual styling
+├── 📓 Plant_Disease_Detection_V2.ipynb # Data prep, training, and evaluation notebook
+├── 🧠 best_custom_cnn.pth             # Custom CNN weights
+├── 🧠 best_resnet18.pth               # ResNet-18 weights
 ├── 📁 .streamlit/
-│   └── config.toml            # Theme settings
-├── 📦 requirements.txt        # Python package dependencies
-├── 🧠 best_custom_cnn.pth     # Custom CNN trained model weights
-├── 🧠 best_resnet18.pth       # ResNet18 trained model weights
-├── 🙈 .gitignore              # Files ignored by Git control
-└── 📖 README.md               # Project documentation
+│   └── config.toml                    # Theme settings
+├── 📁 assets/                         # Screenshots and figures used in this README
+├── 📁 docs/                           # Project report (PDF) and presentation (PPTX)
+├── 📦 requirements.txt                # Python dependencies
+├── 🙈 .gitignore
+└── 📖 README.md
 ```
 
 ---
 
 ## 🚀 Quick Start
 
-Get the diagnostic engine running on your local machine in seconds:
-
 ```bash
-# 1. Install dependencies
+# 1. Clone the repository
+git clone YOUR_REPO_URL
+cd FloraScan-AI
+
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# 2. Launch the Streamlit dashboard
+# 3. Launch the dashboard
 streamlit run app.py
 ```
 
@@ -83,10 +155,27 @@ Most changes only touch `config.py`:
 | Different confidence threshold | `CONFIDENCE_THRESHOLD` in `config.py`. |
 | Different crop | `CLASS_NAMES`, `CROP_EMOJI`, and text in `config.py`. |
 
-> ⚠️ **`CLASS_NAMES` must match your training label order exactly.** If you trained with `ImageFolder`, run `print(train_dataset.classes)` and use that order. A wrong order raises no error but gives wrong diagnoses.
+> ⚠️ **`CLASS_NAMES` must match your training label order exactly.** This project's `ImageFolder` order is `Not_Leaf, Tomato_Bacterial_spot, Tomato_Early_blight, Tomato_Late_blight, Tomato_healthy`. If you retrain, run `print(train_dataset.classes)` and use that order. A wrong order raises no error but gives wrong diagnoses.
 
 ---
 
-## ⚠️ Disclaimer
+## ⚠️ Limitations
+
+* PlantVillage images are lab-style; accuracy on real field photos may be lower.
+* The synthetic *Not Leaf* class is simple, so cluttered real-world non-leaf photos may still get a confident leaf label.
+* Evaluation uses one random split and overall accuracy; no confusion matrix or per-class metrics yet.
+* Covers one crop and three diseases.
+
+## 🔭 Future Work
+
+Fine-tuned ResNet comparison · per-class metrics and cross-validation · field images and realistic negatives · multi-crop expansion (potato, pepper, corn, apple, grape) · ONNX / mobile export · GPS-tagged outbreak mapping.
+
+---
+
+## 🎓 Academic Context
+
+Developed as the **Deep Learning** semester project (BSCS-7A, 7th Semester) by **Asad Ali Sajjad** (SU92-BSCSM-F23-167), under the supervision of **Dr. Munir Ahmad**.
+
+## ⚖️ Disclaimer
 
 FloraScan AI provides AI-assisted guidance only. Confirm critical decisions with a qualified agronomist.
