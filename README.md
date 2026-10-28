@@ -10,7 +10,7 @@
 
 *A dual-engine computer vision dashboard that classifies tomato leaf health in seconds, and refuses to guess when it is unsure.*
 
-[**Live Demo**](https://plant-disease-diagnostic-system.streamlit.app) · [**Project Report (PDF)**](docs/FloraScan_AI_Project_Report.pdf) · [**Presentation**](docs/FloraScan_AI_Presentation.pptx) · [**YouTube Video**](https://youtu.be/XTp5jaRU3Ws?si=b3SunZ4hsCavmjyc) · [**LinkedIn Post**](https://lnkd.in/p/dNEnaMfr) · [**Training Notebook**](Plant_Disease_Detection_V2.ipynb)
+[**Project Website**](https://florascan-ai.vercel.app/) · [**Live Demo**](https://plant-disease-diagnostic-system.streamlit.app) · [**Project Report (PDF)**](docs/FloraScan_AI_Project_Report.pdf) · [**Presentation**](docs/FloraScan_AI_Presentation.pptx) · [**YouTube Video**](https://youtu.be/XTp5jaRU3Ws?si=b3SunZ4hsCavmjyc) · [**LinkedIn Post**](https://lnkd.in/p/dNEnaMfr) · [**Training Notebook**](Plant_Disease_Detection_V2.ipynb)
 
 </div>
 
@@ -24,6 +24,7 @@
 
 | Resource | Link |
 |---|---|
+| 🏠 Project website (all links) | [florascan-ai.vercel.app](https://florascan-ai.vercel.app/) |
 | 🌐 Live web app | [plant-disease-diagnostic-system.streamlit.app](https://plant-disease-diagnostic-system.streamlit.app/) |
 | 💻 GitHub repository | [asad-ali-sajjad/Plant-Disease-Diagnostic-System](https://github.com/asad-ali-sajjad/Plant-Disease-Diagnostic-System) |
 | 🗂️ Dataset (Kaggle) | [PlantVillage](https://www.kaggle.com/datasets/emmarex/plantdisease) |
