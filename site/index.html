@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FloraScan AI | Project Links: Tomato Leaf Disease Diagnosis</title>
+<meta name="description" content="FloraScan AI: dual-engine tomato leaf disease classifier (Custom CNN 96.53%, ResNet-18 94.13%). Live app, GitHub repository, dataset, report, presentation, video and LinkedIn post.">
+<meta property="og:title" content="FloraScan AI | Project Links">
+<meta property="og:description" content="Smart Phytopathology System: all project links in one place.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
+
+<!-- Structured JSON-LD Metadata for Automated Evaluation Crawlers -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "FloraScan AI",
+  "description": "Dual-engine computer vision system for real-time tomato leaf disease diagnosis.",
+  "url": "https://plant-disease-diagnostic-system.streamlit.app/",
+  "codeRepository": "https://github.com/asad-ali-sajjad/Plant-Disease-Diagnostic-System",
+  "programmingLanguage": "Python",
+  "author": {
+    "@type": "Person",
+    "name": "Asad Ali Sajjad",
+    "identifier": "SU92-BSCSM-F23-167"
+  }
+}
+</script>
+
+<style>
+:root{
+  --bg:#f8fafc; --surface:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --em:#059669; --emd:#047857; --mint:#ecfdf5; --warn:#b45309; --warnbg:#fffbeb; --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1220; --surface:#111a2e; --ink:#e2e8f0; --muted:#94a3b8; --line:#1e2a44;
+    --em:#34d399; --emd:#6ee7b7; --mint:#0f2a26; --warn:#fbbf24; --warnbg:#2a2110; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --surface:#111a2e; --ink:#e2e8f0; --muted:#94a3b8; --line:#1e2a44;
+  --em:#34d399; --emd:#6ee7b7; --mint:#0f2a26; --warn:#fbbf24; --warnbg:#2a2110; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#0b1220 0%,#0f172a 55%,#064e3b 140%);color:#fff;padding:56px 0 72px}
+.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;pointer-events:none}
+.hero:before{width:520px;height:520px;right:-140px;top:-220px;background:rgba(5,150,105,.28)}
+.hero:after{width:300px;height:300px;right:80px;top:-120px;background:rgba(16,185,129,.18)}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:46px;position:relative;z-index:1}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#34d399}
+.theme{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer}
+.theme:hover{background:rgba(255,255,255,.16)}
+.hero h1{font-size:clamp(40px,7vw,68px);line-height:1.02;margin:0 0 10px;letter-spacing:-.02em;position:relative;z-index:1}
+.hero h2{font-size:clamp(18px,2.6vw,24px);font-weight:500;color:#a7f3d0;margin:0 0 16px;position:relative;z-index:1}
+.hero p.lead{max-width:620px;color:#cbd5e1;font-size:17px;margin:0 0 28px;position:relative;z-index:1}
+.cta{display:flex;flex-wrap:wrap;gap:12px;position:relative;z-index:1}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:12px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer;font-family:inherit;transition:transform .12s ease,background .12s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:#10b981;color:#052e22}
+.btn.primary:hover{background:#34d399}
+.btn.ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.22)}
+.btn.ghost:hover{background:rgba(255,255,255,.16)}
+:focus-visible{outline:3px solid #34d399;outline-offset:2px}
+
+/* ---------- stats ---------- */
+.stats{margin-top:-40px;position:relative;z-index:2}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.stat{padding:20px 14px;text-align:center;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-size:clamp(22px,4vw,32px);color:var(--emd);letter-spacing:-.01em}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+/* ---------- toolbar ---------- */
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:42px 0 6px}
+.toolbar h3{margin:0;font-size:22px;letter-spacing:-.01em}
+.progress{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.bar{width:140px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--em);transition:width .4s ease}
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+.btn.tool{background:var(--surface);color:var(--ink);border-color:var(--line);padding:9px 15px;font-size:14px}
+.btn.tool:hover{border-color:var(--em)}
+.sub{color:var(--muted);margin:0 0 18px;font-size:14.5px}
+
+/* ---------- cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px;margin-bottom:38px}
+.grid.four{grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;transition:transform .15s ease,border-color .15s ease}
+.card:hover{transform:translateY(-2px);border-color:var(--em)}
+.card .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--emd);background:var(--mint);border-radius:99px;padding:3px 10px}
+.tag.opt{color:var(--muted);background:var(--bg);border:1px solid var(--line)}
+.status{font-size:12.5px;font-weight:600;color:var(--emd);display:inline-flex;align-items:center;gap:6px}
+.status:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--em)}
+.card.pending .status{color:var(--warn)}
+.card.pending .status:before{background:var(--warn)}
+.status.bad{color:#dc2626}.status.bad:before{background:#dc2626}
+.status.wait:before{animation:pulse 1s infinite;background:var(--muted)}
+@keyframes pulse{50%{opacity:.2}}
+.card h4{margin:6px 0 0;font-size:18px;letter-spacing:-.005em}
+.card h4 a{text-decoration:none}
+.card h4 a:hover{color:var(--emd);text-decoration:underline}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.url{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--muted);word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-top:4px}
+.card.pending .url{color:var(--warn);background:var(--warnbg);border-color:transparent;font-family:inherit;font-size:12.5px}
+.actions{display:flex;gap:8px;margin-top:auto;padding-top:10px}
+.actions .btn{padding:8px 14px;font-size:13.5px;border-radius:10px}
+.btn.open{background:var(--em);color:#fff}
+[data-theme="dark"] .btn.open,:root:not([data-theme="light"]) .btn.open{color:#04261c}
+.btn.copy{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.copy:hover{border-color:var(--em)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ---------- demo ---------- */
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:20px;margin-bottom:38px}
+.demo-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:12px}
+.demo h3{margin:0;font-size:20px}
+.frame{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg);min-height:120px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px}
+.frame iframe{width:100%;height:720px;border:0;display:block}
+
+/* ---------- glance ---------- */
+.glance{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:46px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+.panel h4{margin:0 0 10px;font-size:17px;color:var(--emd)}
+.panel ul{margin:0;padding-left:18px;color:var(--ink);font-size:14.5px}
+.panel li{margin:5px 0}
+.panel table{width:100%;border-collapse:collapse;font-size:14px}
+.panel th,.panel td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.panel th{color:var(--muted);font-weight:600;font-size:12.5px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;background:var(--bg);padding:1px 6px;border-radius:6px;border:1px solid var(--line)}
+
+/* ---------- high-visibility academic footer ---------- */
+.awesome-footer {
+  border-top: 1px solid var(--line);
+  padding: 52px 0 36px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 36px;
+  margin-bottom: 36px;
+}
+.brand-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 8px;
+  letter-spacing: -.01em;
+}
+.brand-desc {
+  margin: 0 0 18px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.disclaimer-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--mint);
+  border: 1px solid var(--em);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--emd);
+  font-weight: 500;
+}
+.footer-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.meta-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--em);
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+  transition: transform .12s ease, border-color .12s ease;
+}
+.meta-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--em);
+}
+.meta-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 800;
+  color: var(--emd);
+  margin-bottom: 2px;
+}
+.meta-val {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.3;
+}
+.footer-bottom {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.back-top {
+  color: var(--em);
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.back-top:hover {
+  text-decoration: underline;
+}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,30px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:all .25s ease;z-index:20}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:768px){
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+}
+@media (max-width:640px){
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+  .stat:nth-child(2){border-right:0}
+  .stat:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .frame iframe{height:600px}
+  .hero{padding-top:36px}
+}
+@media (max-width:480px){
+  .footer-meta { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="topbar">
+      <span class="eyebrow">Deep Learning &middot; Semester Project</span>
+      <button class="theme" id="themeBtn" type="button" aria-label="Toggle colour theme">Toggle theme</button>
+    </div>
+    <h1>FloraScan AI</h1>
+    <h2>Smart Phytopathology System</h2>
+    <p class="lead">A dual-engine computer vision app that diagnoses tomato leaf health in seconds and refuses to guess when it is unsure. Every link for this project is collected on this page.</p>
+    <div class="cta">
+      <a class="btn primary" href="#live-demo" id="ctaDemo">Try the live demo</a>
+      <a class="btn ghost" href="#submission">Jump to all links</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="stats" aria-label="Key results">
+  <div class="wrap">
+    <div class="stat-row">
+      <div class="stat"><b>96.53%</b><span>Custom CNN test accuracy</span></div>
+      <div class="stat"><b>94.13%</b><span>ResNet-18 test accuracy</span></div>
+      <div class="stat"><b>5,000</b><span>Curated images</span></div>
+      <div class="stat"><b>5</b><span>Health states</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+
+  <!-- toolbar -->
+  <div class="toolbar" id="submission">
+    <h3>Submission links</h3>
+    <div class="tools">
+      <button class="btn tool" id="testBtn" type="button">Test links</button>
+      <button class="btn tool" id="copyAllBtn" type="button">Copy all links</button>
+    </div>
+  </div>
+  <div class="progress" style="margin:6px 0 16px">
+    <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+    <span id="progressText">Checking links&hellip;</span>
+  </div>
+  <p class="sub">The four items the submission form asks for. Each card opens in a new tab.</p>
+
+  <section class="grid four" aria-label="Required submission links">
+
+    <article class="card" data-title="Live web app">
+      <div class="row"><span class="tag">Required</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://plant-disease-diagnostic-system.streamlit.app/" target="_blank" rel="noopener">Live Web App</a></h4>
+      <p>Upload a leaf photo and get a diagnosis, confidence, and action plan. Switch between both engines or compare them.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="GitHub repository">
+      <div class="row"><span class="tag">Required</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://github.com/asad-ali-sajjad/Plant-Disease-Diagnostic-System" target="_blank" rel="noopener">GitHub Repository</a></h4>
+      <p>Source code, training notebook, model weights, report, and presentation.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="YouTube video">
+      <div class="row"><span class="tag">Required</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://youtu.be/XTp5jaRU3Ws?si=b3SunZ4hsCavmjyc" target="_blank" rel="noopener">YouTube Presentation Video</a></h4>
+      <p>Slide presentation with a voiceover and a live walkthrough of the app.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="LinkedIn post">
+      <div class="row"><span class="tag">Required</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://lnkd.in/p/dNEnaMfr" target="_blank" rel="noopener">LinkedIn Project Post</a></h4>
+      <p>Public post announcing the project with the repository and demo links.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+  </section>
+
+  <div class="toolbar" style="margin-top:6px"><h3>Project resources</h3></div>
+  <p class="sub">Dataset, documents, code and model weights.</p>
+
+  <section class="grid" aria-label="Project resources">
+
+    <article class="card" data-title="Dataset (Kaggle)">
+      <div class="row"><span class="tag">Dataset</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://www.kaggle.com/datasets/emmarex/plantdisease" target="_blank" rel="noopener">PlantVillage Dataset (Kaggle)</a></h4>
+      <p>Source of the leaf images. 1,000 images per tomato class were sampled, plus 1,000 synthetic Not Leaf images.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="Project report (PDF)">
+      <div class="row"><span class="tag">Document</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://github.com/asad-ali-sajjad/Plant-Disease-Diagnostic-System/blob/main/docs/FloraScan_AI_Project_Report.pdf" target="_blank" rel="noopener">Project Report (PDF)</a></h4>
+      <p>Full technical report: problem, dataset, architectures, training, results, and limitations.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="Presentation (PPTX)">
+      <div class="row"><span class="tag">Document</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://github.com/asad-ali-sajjad/Plant-Disease-Diagnostic-System/blob/main/docs/FloraScan_AI_Presentation.pptx" target="_blank" rel="noopener">Presentation Slides (PPTX)</a></h4>
+      <p>12-slide deck covering the project from problem statement to future work.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="Training notebook">
+      <div class="row"><span class="tag">Code</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://github.com/asad-ali-sajjad/Plant-Disease-Diagnostic-System/blob/main/Plant_Disease_Detection_V2.ipynb" target="_blank" rel="noopener">Training Notebook</a></h4>
+      <p>Data preparation, both model definitions, training logs, and test evaluation.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="Notebook in Colab">
+      <div class="row"><span class="tag">Code</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://colab.research.google.com/github/asad-ali-sajjad/Plant-Disease-Diagnostic-System/blob/main/Plant_Disease_Detection_V2.ipynb" target="_blank" rel="noopener">Open Notebook in Colab</a></h4>
+      <p>Run or inspect the training notebook directly in Google Colab.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="Custom CNN weights">
+      <div class="row"><span class="tag">Weights</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://huggingface.co/asadalisajjad/FloraScan-AI-Weights/resolve/main/best_custom_cnn_5class.pth" target="_blank" rel="noopener">Custom CNN Weights (.pth)</a></h4>
+      <p><code>best_custom_cnn_5class.pth</code> &middot; 196 MB &middot; Direct download via Hugging Face Hub.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="ResNet-18 weights">
+      <div class="row"><span class="tag">Weights</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://huggingface.co/asadalisajjad/FloraScan-AI-Weights/resolve/main/best_resnet18_5class.pth" target="_blank" rel="noopener">ResNet-18 Weights (.pth)</a></h4>
+      <p><code>best_resnet18_5class.pth</code> &middot; 42.7 MB &middot; Direct download via Hugging Face Hub.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="Screenshots">
+      <div class="row"><span class="tag">Media</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://github.com/asad-ali-sajjad/Plant-Disease-Diagnostic-System/tree/main/assets/screenshots" target="_blank" rel="noopener">App Screenshots</a></h4>
+      <p>Screens of the scan, dual benchmark, safety threshold, disease library, and history views.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+    <article class="card" data-title="Weights mirror">
+      <div class="row"><span class="tag">Mirror</span><span class="status">Ready</span></div>
+      <h4><a class="main" href="https://huggingface.co/asadalisajjad/FloraScan-AI-Weights" target="_blank" rel="noopener">Weights Mirror (Hugging Face Hub)</a></h4>
+      <p>Alternative repository hosting on Hugging Face Hub for direct inspection and verification.</p>
+      <div class="url"></div>
+      <div class="actions"><button class="btn open" type="button">Open</button><button class="btn copy" type="button">Copy</button></div>
+    </article>
+
+  </section>
+
+  <!-- live demo -->
+  <section class="demo" id="live-demo" aria-label="Live demo">
+    <div class="demo-head">
+      <h3>Live demo</h3>
+      <button class="btn tool" id="loadDemo" type="button">Load live demo here</button>
+    </div>
+    <div class="frame" id="frame">The demo loads on request so this page stays fast. Free Streamlit apps sleep when idle, so the first load can take up to a minute.</div>
+  </section>
+
+  <!-- project at a glance -->
+  <div class="toolbar" style="margin-top:6px"><h3>Project at a glance</h3></div>
+  <section class="glance" aria-label="Project details">
+    <div class="panel">
+      <h4>Dataset</h4>
+      <ul>
+        <li>Source: PlantVillage on Kaggle (20,638 images, 15 categories)</li>
+        <li>Five balanced classes, 1,000 images each: Tomato Healthy, Bacterial Spot, Early Blight, Late Blight, and a synthetic Not Leaf class</li>
+        <li>Split 70 / 15 / 15: 3,500 train, 750 validation, 750 test (seed 42)</li>
+        <li>224 &times; 224 RGB, ImageNet normalization; flip and rotation augmentation on training data only</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4>Models and results</h4>
+      <table>
+        <tr><th>Model</th><th>Approach</th><th>Test acc.</th></tr>
+        <tr><td>Custom 3-block CNN</td><td>From scratch, ~51.5 M params</td><td><b>96.53%</b><br>724 / 750</td></tr>
+        <tr><td>ResNet-18</td><td>Transfer learning, frozen backbone</td><td><b>94.13%</b><br>706 / 750</td></tr>
+      </table>
+      <p class="sub" style="margin:10px 0 0;font-size:13px">Adam (lr 0.001), cross-entropy, batch 32, 10 epochs on a T4 GPU. Predictions below 65% confidence are shown as Unrecognized.</p>
+    </div>
+    <div class="panel">
+      <h4>Code structure</h4>
+      <table>
+        <tr><td><code>app.py</code></td><td>Streamlit interface and scan workflow</td></tr>
+        <tr><td><code>config.py</code></td><td>Classes, threshold, disease knowledge base</td></tr>
+        <tr><td><code>model.py</code></td><td>Model definitions, loading, cached prediction</td></tr>
+        <tr><td><code>ui.py</code>, <code>styles.css</code></td><td>Result cards, bars, reports, styling</td></tr>
+        <tr><td><code>*.pth</code></td><td>Two trained checkpoints (Hugging Face / Git LFS)</td></tr>
+      </table>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer class="awesome-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <!-- Left side: Project branding & disclaimer -->
+      <div class="footer-brand">
+        <div class="brand-title">🌿 FloraScan AI</div>
+        <p class="brand-desc">Dual-engine computer vision system for real-time tomato leaf disease diagnosis.</p>
+        <div class="disclaimer-badge">
+          <span>⚠️ <strong>AI Guidance Only</strong> &middot; Confirm critical crop decisions with a qualified agronomist.</span>
+        </div>
+      </div>
+
+      <!-- Right side: High-Visibility Academic Metadata Cards -->
+      <div class="footer-meta">
+        <div class="meta-card">
+          <span class="meta-label">Author / Student</span>
+          <span class="meta-val">Asad Ali Sajjad</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Student ID</span>
+          <span class="meta-val">SU92-BSCSM-F23-167</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Class &amp; Term</span>
+          <span class="meta-val">BSCS-7A &middot; 7th Semester</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Course &amp; Instructor</span>
+          <span class="meta-val">Deep Learning &middot; Dr. Munir Ahmad</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom">
+      <span>&copy; 2026 FloraScan AI &middot; Deep Learning Semester Project</span>
+      <a href="#top" class="back-top">Back to top &uarr;</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var toastEl = document.getElementById('toast'), tt;
+  function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(tt); tt = setTimeout(function(){ toastEl.classList.remove('show'); }, 1800); }
+
+  function info(c){
+    var a = c.querySelector('a.main'), href = (a.getAttribute('href') || '').trim();
+    return { a:a, href:href, pending:(href === '#' || href === ''), title:c.getAttribute('data-title'), optional:c.hasAttribute('data-optional') };
+  }
+  function copyText(text, okMsg){
+    function fallback(){ var t = document.createElement('textarea'); t.value = text; t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t); t.select(); try{ document.execCommand('copy'); toast(okMsg); }catch(e){ toast('Copy failed'); } document.body.removeChild(t); }
+    if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(function(){ toast(okMsg); }, fallback); } else { fallback(); }
+  }
+
+  function render(){
+    var required = 0, ready = 0;
+    cards.forEach(function(c){
+      var i = info(c), st = c.querySelector('.status'), url = c.querySelector('.url'), open = c.querySelector('.btn.open'), copy = c.querySelector('.btn.copy');
+      c.classList.toggle('pending', i.pending);
+      st.className = 'status';
+      if(i.pending){
+        st.textContent = i.optional ? 'Optional' : 'Add link';
+        url.textContent = i.optional ? 'Not added. You can leave this card out.' : 'Link not added yet. Replace href="#" in index.html.';
+        open.disabled = true; copy.disabled = true;
+      } else {
+        st.textContent = 'Ready'; url.textContent = i.href; open.disabled = false; copy.disabled = false;
+      }
+      if(!i.optional){ required++; if(!i.pending) ready++; }
+    });
+    document.getElementById('barFill').style.width = (required ? Math.round(ready/required*100) : 0) + '%';
+    document.getElementById('progressText').textContent = ready + ' of ' + required + ' links ready' + (ready === required ? '. All set.' : '');
+  }
+
+  cards.forEach(function(c){
+    c.querySelector('.btn.open').addEventListener('click', function(){ var i = info(c); if(!i.pending) window.open(i.href, '_blank', 'noopener'); });
+    c.querySelector('.btn.copy').addEventListener('click', function(){ var i = info(c); if(!i.pending) copyText(i.href, 'Link copied'); });
+  });
+
+  document.getElementById('copyAllBtn').addEventListener('click', function(){
+    var lines = cards.map(info).filter(function(i){ return !i.pending; }).map(function(i){ return i.title + ': ' + i.href; });
+    var missing = cards.map(info).filter(function(i){ return i.pending && !i.optional; }).map(function(i){ return i.title; });
+    var text = lines.join('\n') + (missing.length ? '\n\nStill missing: ' + missing.join(', ') : '');
+    copyText(text, lines.length + ' links copied');
+  });
+
+  document.getElementById('testBtn').addEventListener('click', function(){
+    var btn = this; btn.disabled = true; btn.textContent = 'Testing\u2026';
+    var jobs = cards.filter(function(c){ return !info(c).pending; }).map(function(c){
+      var st = c.querySelector('.status'); st.className = 'status wait'; st.textContent = 'Checking\u2026';
+      var ctl = ('AbortController' in window) ? new AbortController() : null, timer = setTimeout(function(){ if(ctl) ctl.abort(); }, 9000);
+      return fetch(info(c).href, { method:'HEAD', mode:'no-cors', signal: ctl ? ctl.signal : undefined }).then(function(){
+        clearTimeout(timer); st.className = 'status'; st.textContent = 'Reachable';
+        return true;
+      }).catch(function(){
+        clearTimeout(timer); st.className = 'status bad'; st.textContent = 'Not reachable'; return false;
+      });
+    });
+    Promise.all(jobs).then(function(r){
+      var ok = r.filter(Boolean).length; btn.disabled = false; btn.textContent = 'Test links';
+      toast(ok + ' of ' + r.length + ' links reachable');
+    });
+  });
+
+  var frame = document.getElementById('frame');
+  function loadDemo(){
+    var app = info(cards[0]).href.replace(/\/+$/, '');
+    frame.innerHTML = ''; var f = document.createElement('iframe');
+    f.src = app + '/?embed=true'; f.title = 'FloraScan AI live demo'; f.loading = 'lazy'; f.allow = 'clipboard-write';
+    frame.appendChild(f); frame.style.display = 'block'; frame.style.padding = '0';
+    document.getElementById('loadDemo').textContent = 'Reload demo';
+  }
+  document.getElementById('loadDemo').addEventListener('click', loadDemo);
+  document.getElementById('ctaDemo').addEventListener('click', function(){ if(!frame.querySelector('iframe')) setTimeout(loadDemo, 400); });
+
+  var root = document.documentElement, saved = null;
+  try{ saved = localStorage.getItem('fs-theme'); }catch(e){}
+  if(saved){ root.setAttribute('data-theme', saved); }
+  document.getElementById('themeBtn').addEventListener('click', function(){
+    var dark = root.getAttribute('data-theme') ? root.getAttribute('data-theme') === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next = dark ? 'light' : 'dark'; root.setAttribute('data-theme', next);
+    try{ localStorage.setItem('fs-theme', next); }catch(e){}
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
