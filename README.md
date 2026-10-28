@@ -10,13 +10,29 @@
 
 *A dual-engine computer vision dashboard that classifies tomato leaf health in seconds, and refuses to guess when it is unsure.*
 
-[**Live Demo**](https://plant-disease-diagnostic-system.streamlit.app) · [**Project Report (PDF)**](docs/FloraScan_AI_Project_Report.pdf) · [**Presentation**](docs/FloraScan_AI_Presentation.pptx) · [**Training Notebook**](Plant_Disease_Detection_V2.ipynb)
+[**Live Demo**](https://plant-disease-diagnostic-system.streamlit.app) · [**Project Report (PDF)**](docs/FloraScan_AI_Project_Report.pdf) · [**Presentation**](docs/FloraScan_AI_Presentation.pptx) · [**YouTube Video**](https://youtu.be/XTp5jaRU3Ws?si=b3SunZ4hsCavmjyc) · [**LinkedIn Post**](https://lnkd.in/p/dNEnaMfr) · [**Training Notebook**](Plant_Disease_Detection_V2.ipynb)
 
 </div>
 
 <br>
 
 > **FloraScan AI** takes a photo of a single tomato leaf and diagnoses it as **Healthy**, **Bacterial Spot**, **Early Blight**, **Late Blight**, or **Not Leaf**, using two deep learning models that can be run individually or compared side by side.
+
+---
+
+## 🔗 Project Links
+
+| Resource | Link |
+|---|---|
+| 🌐 Live web app | [plant-disease-diagnostic-system.streamlit.app](https://plant-disease-diagnostic-system.streamlit.app/) |
+| 💻 GitHub repository | [asad-ali-sajjad/Plant-Disease-Diagnostic-System](https://github.com/asad-ali-sajjad/Plant-Disease-Diagnostic-System) |
+| 🗂️ Dataset (Kaggle) | [PlantVillage](https://www.kaggle.com/datasets/emmarex/plantdisease) |
+| 📄 Project report | [docs/FloraScan_AI_Project_Report.pdf](docs/FloraScan_AI_Project_Report.pdf) |
+| 📊 Presentation | [docs/FloraScan_AI_Presentation.pptx](docs/FloraScan_AI_Presentation.pptx) |
+| ▶️ YouTube video | [Watch the presentation and demo](https://youtu.be/XTp5jaRU3Ws?si=b3SunZ4hsCavmjyc) |
+| 💼 LinkedIn post | [Project announcement](https://lnkd.in/p/dNEnaMfr) |
+| 📓 Notebook | [Plant_Disease_Detection_V2.ipynb](Plant_Disease_Detection_V2.ipynb) ([open in Colab](https://colab.research.google.com/github/asad-ali-sajjad/Plant-Disease-Diagnostic-System/blob/main/Plant_Disease_Detection_V2.ipynb)) |
+| 🧠 Model weights | [Hugging Face Hub](https://huggingface.co/asadalisajjad/FloraScan-AI-Weights) or this repository (Git LFS) |
 
 ---
 
@@ -73,7 +89,7 @@ Both models were trained for 10 epochs on the same data and evaluated once on a 
 
 ## 🗂️ Dataset
 
-Built from the [PlantVillage](https://arxiv.org/abs/1511.08060) corpus (20,638 images, 15 categories) and balanced to **1,000 images per class**:
+Built from the [PlantVillage](https://www.kaggle.com/datasets/emmarex/plantdisease) corpus (20,638 images, 15 categories) and balanced to **1,000 images per class**:
 
 | Class | Images | Source |
 |---|---|---|
@@ -111,10 +127,13 @@ FloraScan-AI/
 ├── 🎨 ui.py                           # HTML components: result cards, probability bars, reports
 ├── 💅 styles.css                      # All visual styling
 ├── 📓 Plant_Disease_Detection_V2.ipynb # Data prep, training, and evaluation notebook
-├── 🧠 best_custom_cnn.pth             # Custom CNN weights
-├── 🧠 best_resnet18.pth               # ResNet-18 weights
+├── 🧠 best_custom_cnn_5class.pth      # Custom CNN weights (196 MB, Git LFS)
+├── 🧠 best_resnet18_5class.pth        # ResNet-18 weights (42.7 MB, Git LFS)
 ├── 📁 .streamlit/
 │   └── config.toml                    # Theme settings
+├── 📁 .devcontainer/                  # Dev container setup
+├── 📎 .gitattributes                  # Git LFS tracking rules for .pth files
+├── 📜 LICENSE
 ├── 📁 assets/                         # Screenshots and figures used in this README
 ├── 📁 docs/                           # Project report (PDF) and presentation (PPTX)
 ├── 📦 requirements.txt                # Python dependencies
@@ -127,9 +146,10 @@ FloraScan-AI/
 ## 🚀 Quick Start
 
 ```bash
-# 1. Clone the repository
-git clone YOUR_REPO_URL
-cd FloraScan-AI
+# 1. Clone the repository (the model weights use Git LFS)
+git lfs install
+git clone https://github.com/asad-ali-sajjad/Plant-Disease-Diagnostic-System.git
+cd Plant-Disease-Diagnostic-System
 
 # 2. Install dependencies
 pip install -r requirements.txt
@@ -138,7 +158,9 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-> Requires **Streamlit 1.27 or newer**. Both `.pth` files must sit next to `app.py`.
+> Requires **Streamlit 1.27 or newer**. Both `.pth` files (`best_custom_cnn_5class.pth` and `best_resnet18_5class.pth`) must sit next to `app.py`.
+>
+> **Weights not downloading?** Without Git LFS, Git fetches tiny pointer files instead of the real weights and the app cannot load them. Run `git lfs pull`, or download both files from the [Hugging Face mirror](https://huggingface.co/asadalisajjad/FloraScan-AI-Weights) and place them next to `app.py`.
 
 ---
 
