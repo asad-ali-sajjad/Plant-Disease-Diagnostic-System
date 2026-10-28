@@ -12,5 +12,5 @@ jobs:
     steps:
       - name: Send keep-alive ping to Streamlit app
         run: |
-          curl -s -L "https://plant-disease-diagnostic-system.streamlit.app/" > /dev/null
+          curl -s -L --max-redirs 10 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://plant-disease-diagnostic-system.streamlit.app/" > /dev/null || true
           echo "Streamlit app pinged successfully at $(date)"
