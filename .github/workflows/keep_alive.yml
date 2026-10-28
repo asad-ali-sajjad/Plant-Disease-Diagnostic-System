@@ -1,0 +1,16 @@
+name: Keep Streamlit App Awake
+
+on:
+  schedule:
+    # Runs every 10 minutes automatically
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual triggering from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send keep-alive ping to Streamlit app
+        run: |
+          curl -s -L "https://plant-disease-diagnostic-system.streamlit.app/" > /dev/null
+          echo "Streamlit app pinged successfully at $(date)"
