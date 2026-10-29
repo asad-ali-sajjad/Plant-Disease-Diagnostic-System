@@ -245,6 +245,12 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
 </style>
+
+<script data-goatcounter="https://florascan.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js">
+</script>
+
+
 </head>
 <body>
 
@@ -589,5 +595,34 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
   render();
 })();
 </script>
+
+<script>
+(function() {
+  const webhookUrl = "https://discord.com/api/webhooks/1565436478639841371/zSyC9hQXCZ3RHAnr3Vb0ycqJNb5aNAQ8wTJWIn_wzslAP9vjFMvRCCIWStusbXrySi7L";
+
+  // Log once per session to avoid spam on page refreshes
+  if (!sessionStorage.getItem("visitor_logged")) {
+    sessionStorage.setItem("visitor_logged", "true");
+
+    fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        embeds: [{
+          title: "🌿 New FloraScan AI Visitor",
+          color: 3447003, // Emerald green
+          fields: [
+            { name: "Page URL", value: window.location.href, inline: true },
+            { name: "Referrer", value: document.referrer || "Direct / Bookmark", inline: true },
+            { name: "User Agent", value: navigator.userAgent },
+            { name: "Time", value: new Date().toUTCString() }
+          ]
+        }]
+      })
+    }).catch(function(err) {});
+  }
+})();
+</script>
+
 </body>
 </html>
