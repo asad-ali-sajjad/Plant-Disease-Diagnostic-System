@@ -600,26 +600,87 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
 (function() {
   const webhookUrl = "https://discord.com/api/webhooks/1565436478639841371/zSyC9hQXCZ3RHAnr3Vb0ycqJNb5aNAQ8wTJWIn_wzslAP9vjFMvRCCIWStusbXrySi7L";
 
-  // Log once per session to avoid spam on page refreshes
+  // Log once per session to avoid duplicate alerts on page refresh
   if (!sessionStorage.getItem("visitor_logged")) {
     sessionStorage.setItem("visitor_logged", "true");
+
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(geo => sendLog(geo))
+      .catch(() => sendLog(null)); // Fallback if IP API is blocked by ad-blocker
+  }
+
+  function sendLog(geo) {
+    const isTouch = navigator.maxTouchPoints > 0;
+    const deviceType = isTouch ? "📱 Mobile / Tablet" : "💻 Desktop";
+    const screenRes = `${window.screen.width}x${window.screen.height}`;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown";
+    const lang = navigator.language || "en";
+    const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} CPU Cores` : "CPU Unknown";
+
+    const locationStr = geo && geo.city ? `${geo.city}, ${geo.region}, ${geo.country_name}` : "Shielded / Unknown";
+    const ipStr = geo && geo.ip ? `${geo.ip}` : "Hidden / AdBlocked";
+    const ispStr = geo && geo.org ? `${geo.org}` : "Unknown ISP";
 
     fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        username: "FloraScan Telemetry",
+        avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f33f.png",
         embeds: [{
-          title: "🌿 New FloraScan AI Visitor",
-          color: 3447003, // Emerald green
+          author: {
+            name: "FloraScan AI • Realtime Visitor Alert",
+            icon_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f33f.png"
+          },
+          title: "🟢 New Session Detected",
+          description: `A visitor landed on [florascan-ai.vercel.app](${window.location.href})`,
+          color: 1095781, // Emerald Green (#10B981)
           fields: [
-            { name: "Page URL", value: window.location.href, inline: true },
-            { name: "Referrer", value: document.referrer || "Direct / Bookmark", inline: true },
-            { name: "User Agent", value: navigator.userAgent },
-            { name: "Time", value: new Date().toUTCString() }
-          ]
+            {
+              name: "📍 Location & ISP",
+              value: `\`${locationStr}\`\n\`${ispStr}\``,
+              inline: true
+            },
+            {
+              name: "🌐 IP Address",
+              value: `\`${ipStr}\``,
+              inline: true
+            },
+            {
+              name: "💻 Device & OS",
+              value: `\`${deviceType}\`\n\`${navigator.platform}\``,
+              inline: true
+            },
+            {
+              name: "🖥️ Display & Hardware",
+              value: `\`${screenRes}\` • \`${cores}\``,
+              inline: true
+            },
+            {
+              name: "🕒 Local Timezone",
+              value: `\`${timezone}\` (\`${lang}\`)`,
+              inline: true
+            },
+            {
+              name: "🧭 Traffic Source",
+              value: `\`${document.referrer || "Direct Visit / Bookmark"}\``,
+              inline: true
+            },
+            {
+              name: "🕵️ User Agent",
+              value: `\`\`\`${navigator.userAgent}\`\`\``,
+              inline: false
+            }
+          ],
+          footer: {
+            text: "FloraScan Silent Monitoring System",
+            icon_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f343.png"
+          },
+          timestamp: new Date().toISOString()
         }]
       })
-    }).catch(function(err) {});
+    }).catch(function() {});
   }
 })();
 </script>
