@@ -195,10 +195,50 @@ Fine-tuned ResNet comparison · per-class metrics and cross-validation · field 
 
 ---
 
+<div align="center">
+
 ## 🎓 Academic Context
 
-Developed as the **Deep Learning** semester project (BSCS-7A, 7th Semester) by **Asad Ali Sajjad** (SU92-BSCSM-F23-167), under the supervision of **Dr. Munir Ahmad**.
+<p>
+  <img src="https://img.shields.io/badge/Degree-BS_Computer_Science-059669?style=for-the-badge&logo=googlescholar&logoColor=white" alt="Degree" />
+  <img src="https://img.shields.io/badge/Course-Deep_Learning-10b981?style=for-the-badge&logo=pytorch&logoColor=white" alt="Course" />
+  <img src="https://img.shields.io/badge/Section-BSCS--7A-047857?style=for-the-badge" alt="Section" />
+  <img src="https://img.shields.io/badge/Semester-7th-065f46?style=for-the-badge" alt="Semester" />
+</p>
 
-## ⚖️ Disclaimer
+*Developed as the **Deep Learning** semester project.*
 
-FloraScan AI provides AI-assisted guidance only. Confirm critical decisions with a qualified agronomist.
+<br>
+
+<table width="90%">
+  <thead>
+    <tr>
+      <th width="50%" align="center">👨‍💻 Student Developer</th>
+      <th width="50%" align="center">👨‍🏫 Project Supervisor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <br>
+        <b>Asad Ali Sajjad</b><br><br>
+        <img src="https://img.shields.io/badge/Roll_No-SU92--BSCSM--F23--167-059669?style=flat-square" alt="Roll number" /><br><br>
+        <sub>BS Computer Science · BSCS-7A</sub>
+        <br><br>
+      </td>
+      <td align="center">
+        <br>
+        <b>Dr. Munir Ahmad</b><br><br>
+        <img src="https://img.shields.io/badge/Role-Project_Supervisor-10b981?style=flat-square" alt="Role" /><br><br>
+        <sub>Department of Computer Science</sub>
+        <br><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
+---
+
+> **Disclaimer:** FloraScan AI provides AI-assisted guidance only. Confirm critical decisions with a qualified agronomist.
