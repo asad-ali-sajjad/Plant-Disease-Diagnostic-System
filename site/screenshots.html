@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FloraScan AI | Interface Gallery & Screenshots</title>
+<meta name="description" content="Visual walkthrough of the FloraScan AI tomato leaf disease diagnostic system dashboard.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
+
+<style>
+:root, :root[data-theme="dark"] {
+  --bg:#0b1220; --surface:#111a2e; --ink:#e2e8f0; --muted:#94a3b8; --line:#1e2a44;
+  --em:#34d399; --emd:#6ee7b7; --mint:#0f2a26; --shadow:0 8px 24px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+
+/* Header */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:32px 0 24px;border-bottom:1px solid var(--line);margin-bottom:32px}
+.brand{font-size:22px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.back-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:14px;transition:all .15s ease}
+.back-btn:hover{border-color:var(--em);color:var(--em);transform:translateY(-1px)}
+
+/* Hero Section */
+.hero{margin-bottom:40px}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--em)}
+.hero h1{font-size:clamp(28px,4vw,42px);margin:8px 0 10px;letter-spacing:-.02em}
+.hero p{color:var(--muted);font-size:16px;max-width:650px;margin:0}
+
+/* Gallery Grid */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;margin-bottom:60px}
+.gallery-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:transform .2s ease,border-color .2s ease;display:flex;flex-direction:column}
+.gallery-card:hover{transform:translateY(-4px);border-color:var(--em)}
+
+.img-container{position:relative;background:#050912;overflow:hidden;cursor:pointer;aspect-ratio:16/10}
+.img-container img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;transition:transform .3s ease}
+.gallery-card:hover .img-container img{transform:scale(1.03)}
+
+.overlay{position:absolute;inset:0;background:rgba(11,18,32,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease;color:#fff;font-weight:600;font-size:14px;gap:6px}
+.img-container:hover .overlay{opacity:1}
+
+.card-body{padding:20px;display:flex;flex-direction:column;gap:6px;flex-grow:1}
+.card-num{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--em)}
+.card-title{font-size:18px;font-weight:700;margin:0;letter-spacing:-.01em}
+.card-desc{font-size:14px;color:var(--muted);margin:0;line-height:1.5}
+
+/* Lightbox Modal */
+.modal{position:fixed;inset:0;background:rgba(5,9,18,.92);backdrop-filter:blur(8px);z-index:99;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.modal.active{opacity:1;pointer-events:auto}
+.modal-img{max-width:92vw;max-height:88vh;border-radius:12px;border:1px solid var(--line);box-shadow:0 12px 40px rgba(0,0,0,.6);object-fit:contain}
+.modal-close{position:absolute;top:20px;right:24px;background:var(--surface);border:1px solid var(--line);color:#fff;font-size:24px;width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s ease}
+.modal-close:hover{border-color:var(--em);color:var(--em)}
+
+/* Footer */
+footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-size:13.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">🌿 FloraScan AI</div>
+    <a href="index.html" class="back-btn">&larr; Back to Dashboard</a>
+  </header>
+
+  <section class="hero">
+    <span class="eyebrow">Interface Showcase</span>
+    <h1>App Screenshots & Features</h1>
+    <p>Explore the visual workflow of FloraScan AI, from single-leaf diagnostics and dual-model benchmark comparisons to safety thresholds and scan logs.</p>
+  </section>
+
+  <main class="gallery-grid">
+
+    <!-- Card 1 -->
+    <article class="gallery-card">
+      <div class="img-container" onclick="openModal('assets/screenshots/01-home.png')">
+        <img src="assets/screenshots/01-home.png" alt="Home and Scan Interface" loading="lazy">
+        <div class="overlay">🔍 Click to View Full Size</div>
+      </div>
+      <div class="card-body">
+        <span class="card-num">01 / Overview</span>
+        <h3 class="card-title">Home & Scan Workflow</h3>
+        <p class="card-desc">Upload leaf images via drag-and-drop or file picker and select your preferred deep learning model from the sidebar.</p>
+      </div>
+    </article>
+
+    <!-- Card 2 -->
+    <article class="gallery-card">
+      <div class="img-container" onclick="openModal('assets/screenshots/02-diagnosis.png')">
+        <img src="assets/screenshots/02-diagnosis.png" alt="Diagnosis and Confidence Gauge" loading="lazy">
+        <div class="overlay">🔍 Click to View Full Size</div>
+      </div>
+      <div class="card-body">
+        <span class="card-num">02 / Analysis</span>
+        <h3 class="card-title">Diagnosis & Confidence Gauge</h3>
+        <p class="card-desc">Detailed results featuring visual probability bars, disease confidence gauge, and recommended treatment action plan.</p>
+      </div>
+    </article>
+
+    <!-- Card 3 -->
+    <article class="gallery-card">
+      <div class="img-container" onclick="openModal('assets/screenshots/03-dual-benchmark.png')">
+        <img src="assets/screenshots/03-dual-benchmark.png" alt="Dual Engine Benchmark Mode" loading="lazy">
+        <div class="overlay">🔍 Click to View Full Size</div>
+      </div>
+      <div class="card-body">
+        <span class="card-num">03 / Benchmarking</span>
+        <h3 class="card-title">Dual Benchmark Mode</h3>
+        <p class="card-desc">Run Custom CNN and ResNet-18 side-by-side on the same leaf to inspect model agreement and confidence variations.</p>
+      </div>
+    </article>
+
+    <!-- Card 4 -->
+    <article class="gallery-card">
+      <div class="img-container" onclick="openModal('assets/screenshots/04-unrecognized.png')">
+        <img src="assets/screenshots/04-unrecognized.png" alt="Safety Threshold Warning" loading="lazy">
+        <div class="overlay">🔍 Click to View Full Size</div>
+      </div>
+      <div class="card-body">
+        <span class="card-num">04 / Safety</span>
+        <h3 class="card-title">Safety Threshold Protection</h3>
+        <p class="card-desc">Low-confidence predictions below 65% are flagged as "Unrecognized" instead of making uncertain guesses.</p>
+      </div>
+    </article>
+
+    <!-- Card 5 -->
+    <article class="gallery-card">
+      <div class="img-container" onclick="openModal('assets/screenshots/05-disease-library.png')">
+        <img src="assets/screenshots/05-disease-library.png" alt="Disease Library Knowledge Base" loading="lazy">
+        <div class="overlay">🔍 Click to View Full Size</div>
+      </div>
+      <div class="card-body">
+        <span class="card-num">05 / Knowledge Base</span>
+        <h3 class="card-title">Disease Reference Library</h3>
+        <p class="card-desc">In-app reference cards displaying visual symptoms, severity levels, and organic/chemical care recommendations.</p>
+      </div>
+    </article>
+
+    <!-- Card 6 -->
+    <article class="gallery-card">
+      <div class="img-container" onclick="openModal('assets/screenshots/06-history.png')">
+        <img src="assets/screenshots/06-history.png" alt="Scan History Log" loading="lazy">
+        <div class="overlay">🔍 Click to View Full Size</div>
+      </div>
+      <div class="card-body">
+        <span class="card-num">06 / History</span>
+        <h3 class="card-title">Session Scan History</h3>
+        <p class="card-desc">Automatic tracking of all diagnostic scans performed during the session with single-click history clearing.</p>
+      </div>
+    </article>
+
+  </main>
+
+  <footer>
+    &copy; 2026 FloraScan AI &middot; Deep Learning Semester Project
+  </footer>
+</div>
+
+<!-- Lightbox Modal -->
+<div class="modal" id="modal" onclick="closeModal()">
+  <button class="modal-close" onclick="closeModal()">&times;</button>
+  <img class="modal-img" id="modalImg" src="" alt="Full size preview">
+</div>
+
+<script>
+function openModal(src) {
+  document.getElementById('modalImg').src = src;
+  document.getElementById('modal').classList.add('active');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+
+<!-- Silent Discord Telemetry -->
+<script>
+(function() {
+  const webhookUrl = "https://discord.com/api/webhooks/1565436478639841371/zSyC9hQXCZ3RHAnr3Vb0ycqJNb5aNAQ8wTJWIn_wzslAP9vjFMvRCCIWStusbXrySi7L";
+
+  if (!sessionStorage.getItem("gallery_logged")) {
+    sessionStorage.setItem("gallery_logged", "true");
+
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(geo => sendLog(geo))
+      .catch(() => sendLog(null));
+  }
+
+  function sendLog(geo) {
+    const isTouch = navigator.maxTouchPoints > 0;
+    const deviceType = isTouch ? "📱 Mobile / Tablet" : "💻 Desktop";
+    const screenRes = `${window.screen.width}x${window.screen.height}`;
+    const locationStr = geo && geo.city ? `${geo.city}, ${geo.region}, ${geo.country_name}` : "Shielded / Unknown";
+    const ipStr = geo && geo.ip ? `${geo.ip}` : "Hidden / AdBlocked";
+
+    fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: "FloraScan Telemetry",
+        avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f33f.png",
+        embeds: [{
+          author: {
+            name: "FloraScan AI • Gallery Visit Alert",
+            icon_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f33f.png"
+          },
+          title: "🖼️ Screenshot Gallery Opened",
+          description: `A visitor viewed the screenshot gallery on [florascan-ai.vercel.app](${window.location.href})`,
+          color: 3447003,
+          fields: [
+            { name: "📍 Location", value: `\`${locationStr}\``, inline: true },
+            { name: "🌐 IP Address", value: `\`${ipStr}\``, inline: true },
+            { name: "💻 Device", value: `\`${deviceType}\` (${screenRes})`, inline: true }
+          ],
+          timestamp: new Date().toISOString()
+        }]
+      })
+    }).catch(function() {});
+  }
+})();
+</script>
+
+</body>
+</html>
