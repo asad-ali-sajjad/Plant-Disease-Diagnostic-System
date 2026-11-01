@@ -338,11 +338,14 @@ section.main div[data-testid="stRadio"] > div[role="radiogroup"] > label > div:f
 
 
 def show_image(img):
-    """Full-width image renderer compatible with standard Streamlit versions."""
+    """Full-width image renderer for both new and older Streamlit versions."""
     try:
-        st.image(img, use_container_width=True)
-    except TypeError:
-        st.image(img, use_column_width=True)
+        st.image(img, width="stretch")
+    except Exception:
+        try:
+            st.image(img, use_container_width=True)
+        except Exception:
+            st.image(img, use_column_width=True)
 
 
 def clear_history():
