@@ -7,8 +7,17 @@ Alphabetical ImageFolder class mapping for 5-class model:
   3 -> Tomato Late Blight (Tomato_Late_blight)
   4 -> Tomato Healthy (Tomato_healthy)
 """
+
 from html import escape
 from pathlib import Path
+
+# ---------------------------------------------------------
+# Academic & Developer Information
+# ---------------------------------------------------------
+STUDENT_NAME = "Asad Ali Sajjad"
+STUDENT_ID = "SU92-BSCSM-F23-167"
+CLASS_TERM = "BSCS-7A · 7th Semester"
+COURSE_INSTRUCTOR = "Deep Learning · Dr. Munir Ahmad"
 
 # ---------------------------------------------------------
 # File Paths
@@ -19,6 +28,14 @@ BASE_DIR = Path(__file__).resolve().parent
 PATH_1 = BASE_DIR / "best_custom_cnn_5class.pth" if (BASE_DIR / "best_custom_cnn_5class.pth").exists() else BASE_DIR / "best_custom_cnn.pth"
 PATH_2 = BASE_DIR / "best_resnet18_5class.pth" if (BASE_DIR / "best_resnet18_5class.pth").exists() else BASE_DIR / "best_resnet18.pth"
 CSS_PATH = BASE_DIR / "styles.css"
+
+# Pre-loaded sample images for dashboard testing
+SAMPLE_IMAGES = {
+    "🌿 Healthy Tomato": BASE_DIR / "samples" / "tomato_healthy.jpg",
+    "🍂 Bacterial Spot": BASE_DIR / "samples" / "bacterial_spot.jpg",
+    "🍂 Early Blight": BASE_DIR / "samples" / "early_blight.jpg",
+    "🍂 Late Blight": BASE_DIR / "samples" / "late_blight.jpg",
+}
 
 # ---------------------------------------------------------
 # Application Metadata
