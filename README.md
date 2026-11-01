@@ -31,7 +31,7 @@
 | 📄 Project report | [docs/FloraScan_AI_Project_Report.pdf](docs/FloraScan_AI_Project_Report.pdf) |
 | 📊 Presentation | [docs/FloraScan_AI_Presentation.pptx](docs/FloraScan_AI_Presentation.pptx) |
 | ▶️ YouTube video | [Watch the presentation and demo](https://youtu.be/XTp5jaRU3Ws?si=b3SunZ4hsCavmjyc) |
-| 💼 LinkedIn post | [Project announcement](https://lnkd.in/p/dNEnaMfr) |
+| 💼 LinkedIn post | [Project announcement](https://lnkd.in/p/d-tQ2X9Z) |
 | 📓 Notebook | [Plant_Disease_Detection_V2.ipynb](Plant_Disease_Detection_V2.ipynb) ([open in Colab](https://colab.research.google.com/github/asad-ali-sajjad/Plant-Disease-Diagnostic-System/blob/main/Plant_Disease_Detection_V2.ipynb)) |
 | 🧠 Model weights | [Hugging Face Hub](https://huggingface.co/asadalisajjad/FloraScan-AI-Weights) or this repository (Git LFS) |
 
