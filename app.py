@@ -44,9 +44,9 @@ init_state()
 UPLOAD_KEY = "__upload__"
 
 ENGINE_OPTIONS = [
-    (ENGINE_1_LABEL, "🔹", f"{ENGINE_1_SHORT}: lightweight and fast"),
-    (ENGINE_2_LABEL, "🔸", f"{ENGINE_2_SHORT}: deeper transfer-learning model"),
-    (DUAL_LABEL, "⚖️", "Run both engines and compare them side by side"),
+    (ENGINE_1_LABEL, "🔹", f"{ENGINE_1_SHORT} · lightweight and fast"),
+    (ENGINE_2_LABEL, "🔸", f"{ENGINE_2_SHORT} · deeper transfer-learning model"),
+    (DUAL_LABEL, "⚖️", "Run both engines and compare side by side"),
 ]
 
 if "engine_choice" not in st.session_state:
@@ -161,20 +161,24 @@ st.markdown("""
     color: var(--fs-emerald-dark);
     margin: 4px 0 8px;
 }
+.fs-engine-desc {
+    font-size: 0.76rem;
+    color: var(--fs-muted);
+    padding: 2px 6px 16px;
+    line-height: 1.35;
+}
 [class*="st-key-fs_engine_"],
 [class*="st-key-fs_engine_"] [data-testid="stButton"],
 [class*="st-key-fs_engine_"] button {
     width: 100% !important;
 }
 [class*="st-key-fs_engine_"] button {
-    min-height: 56px !important;
+    min-height: 54px !important;
     padding: 12px 16px !important;
     border-radius: 14px !important;
     border: 1.5px solid var(--fs-border) !important;
     background: var(--fs-card) !important;
     color: var(--fs-text) !important;
-    justify-content: flex-start !important;
-    text-align: left !important;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
     transition: all .18s ease !important;
 }
@@ -211,6 +215,7 @@ st.markdown("""
     font-size: 0.85rem;
     color: var(--fs-muted);
     margin: -2px 0 12px;
+    padding-bottom: 6px;
     line-height: 1.5;
 }
 .source-hint b { color: var(--fs-emerald-dark); }
@@ -220,7 +225,7 @@ st.markdown("""
     border: 1.5px solid var(--fs-border);
     border-radius: 18px;
     padding: 10px;
-    gap: 0.5rem;
+    gap: 0.6rem;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
 }
@@ -230,11 +235,7 @@ st.markdown("""
     box-shadow: 0 12px 24px rgba(16, 185, 129, 0.18);
 }
 /* selected card = the one whose button is primary */
-[class*="st-key-fs_card_"]:has(button[kind="primary"]) {
-    border-color: var(--fs-emerald-dark);
-    background: linear-gradient(160deg, #ecfdf5, #ffffff);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25), 0 12px 26px rgba(16, 185, 129, 0.22);
-}
+[class*="st-key-fs_card_"]:has(button[kind="primary"]),
 [class*="st-key-fs_card_"]:has([data-testid="stBaseButton-primary"]) {
     border-color: var(--fs-emerald-dark);
     background: linear-gradient(160deg, #ecfdf5, #ffffff);
@@ -245,9 +246,10 @@ st.markdown("""
 }
 .fs-card-title {
     font-weight: 800;
-    font-size: 0.92rem;
+    font-size: 0.95rem;
     color: var(--fs-ink);
     line-height: 1.25;
+    padding-bottom: 18px;
 }
 .fs-card-sub {
     font-size: 0.76rem;
@@ -266,12 +268,13 @@ st.markdown("""
     color: var(--fs-muted);
     font-size: 0.78rem;
     gap: 4px;
+    margin-bottom: 6px;
 }
 .fs-upload-body {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 4px 4px 0;
+    padding: 4px 4px 22px;
 }
 .fs-upload-icon {
     width: 54px;
@@ -286,37 +289,44 @@ st.markdown("""
     border: 1.5px dashed var(--fs-emerald);
 }
 
-/* card buttons */
-[class*="st-key-fs_card_"] [data-testid="stButton"],
-[class*="st-key-fs_card_"] button {
+/* card buttons: full width, never overlapping content above */
+[class*="st-key-fs_pick_"] {
+    width: 100% !important;
+    margin-top: 8px !important;
+    position: relative;
+    z-index: 1;
+}
+[class*="st-key-fs_pick_"] [data-testid="stButton"],
+[class*="st-key-fs_pick_"] button {
     width: 100% !important;
 }
-[class*="st-key-fs_card_"] button {
-    border-radius: 10px !important;
+[class*="st-key-fs_pick_"] button {
+    border-radius: 12px !important;
     border: 1.5px solid var(--fs-emerald-line) !important;
     background: var(--fs-emerald-soft) !important;
     color: var(--fs-emerald-dark) !important;
-    min-height: 38px !important;
+    min-height: 42px !important;
+    padding: 8px 12px !important;
     transition: all .15s ease !important;
 }
-[class*="st-key-fs_card_"] button p {
+[class*="st-key-fs_pick_"] button p {
     color: inherit !important;
     font-weight: 700 !important;
-    font-size: 0.85rem !important;
+    font-size: 0.88rem !important;
     margin: 0 !important;
 }
-[class*="st-key-fs_card_"] button:hover:not(:disabled) {
+[class*="st-key-fs_pick_"] button:hover:not(:disabled) {
     background: var(--fs-emerald) !important;
     border-color: var(--fs-emerald) !important;
     color: #ffffff !important;
 }
-[class*="st-key-fs_card_"] button[kind="primary"],
-[class*="st-key-fs_card_"] button[data-testid="stBaseButton-primary"] {
+[class*="st-key-fs_pick_"] button[kind="primary"],
+[class*="st-key-fs_pick_"] button[data-testid="stBaseButton-primary"] {
     background: linear-gradient(135deg, #10b981, #059669) !important;
     border-color: #059669 !important;
     color: #ffffff !important;
 }
-[class*="st-key-fs_card_"] button:disabled {
+[class*="st-key-fs_pick_"] button:disabled {
     opacity: 0.55 !important;
 }
 
@@ -442,19 +452,27 @@ def show_image(img):
             st.image(img, use_column_width=True)
 
 
+def fs_button(label, **kwargs):
+    """Full-width button for both new and older Streamlit versions."""
+    try:
+        return st.button(label, width="stretch", **kwargs)
+    except Exception:
+        return st.button(label, use_container_width=True, **kwargs)
+
+
 def clear_history():
     st.session_state.history = []
 
 
 @st.cache_data(show_spinner=False)
 def load_thumbnail(path_str, mtime):
-    """Square-ish cropped thumbnail for the sample gallery (cached)."""
+    """Cropped thumbnail for the sample gallery (cached)."""
     img = Image.open(path_str).convert("RGB")
     return ImageOps.fit(img, (360, 270), Image.LANCZOS)
 
 
 def sample_card(idx, name, path):
-    """One gallery card: thumbnail, title and a select button."""
+    """One gallery card: thumbnail plus a select button labelled with the sample name."""
     path = Path(path)
     exists = path.exists()
     selected = st.session_state.source_choice == name
@@ -468,9 +486,8 @@ def sample_card(idx, name, path):
         else:
             render('<div class="fs-thumb-missing"><span>🖼️</span><span>Image not found</span></div>')
 
-        render(f'<div class="fs-card-title">{escape(name)}</div>')
-        st.button(
-            "✓ Selected" if selected else "Select",
+        fs_button(
+            f"✓ {name}" if selected else name,
             key=f"fs_pick_{idx}",
             type="primary" if selected else "secondary",
             disabled=not exists,
@@ -488,14 +505,14 @@ with st.sidebar:
 
     for i, (label, icon, tip) in enumerate(ENGINE_OPTIONS):
         active = st.session_state.engine_choice == label
-        st.button(
+        fs_button(
             f"{icon}  {label}" + ("   ✓" if active else ""),
             key=f"fs_engine_{i}",
             type="primary" if active else "secondary",
-            help=tip,
             on_click=set_engine,
             args=(label,),
         )
+        render(f'<div class="fs-engine-desc">{escape(tip)}</div>')
 
     selected_engine = st.session_state.engine_choice
 
@@ -564,13 +581,13 @@ with tab_scan:
             <div class="fs-upload-body">
                 <div class="fs-upload-icon">📁</div>
                 <div>
-                    <div class="fs-card-title">Upload your own leaf</div>
+                    <div class="fs-card-title" style="padding-bottom:0;">Upload your own leaf</div>
                     <div class="fs-card-sub">JPG · PNG · WEBP</div>
                 </div>
             </div>
             """)
-            st.button(
-                "✓ Selected" if upload_selected else "Use upload",
+            fs_button(
+                "✓ Upload selected" if upload_selected else "Use upload",
                 key="fs_pick_upload",
                 type="primary" if upload_selected else "secondary",
                 on_click=set_source,
