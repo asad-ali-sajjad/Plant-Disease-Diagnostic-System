@@ -3,9 +3,10 @@ app.py — Main Streamlit application for FloraScan AI.
 """
 import io
 from html import escape
+from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 import streamlit as st
 
 # config.py imports
@@ -38,8 +39,33 @@ inject_css()
 init_state()
 
 # ---------------------------------------------------------
-# Modern UI styling: Sidebar, Sample Selector, Footer
-# (one shared emerald palette so all three feel consistent)
+# Selection state (engine + input source)
+# ---------------------------------------------------------
+UPLOAD_KEY = "__upload__"
+
+ENGINE_OPTIONS = [
+    (ENGINE_1_LABEL, "🔹", f"{ENGINE_1_SHORT}: lightweight and fast"),
+    (ENGINE_2_LABEL, "🔸", f"{ENGINE_2_SHORT}: deeper transfer-learning model"),
+    (DUAL_LABEL, "⚖️", "Run both engines and compare them side by side"),
+]
+
+if "engine_choice" not in st.session_state:
+    st.session_state.engine_choice = ENGINE_1_LABEL
+if "source_choice" not in st.session_state:
+    st.session_state.source_choice = UPLOAD_KEY
+
+
+def set_engine(label):
+    st.session_state.engine_choice = label
+
+
+def set_source(key):
+    st.session_state.source_choice = key
+
+
+# ---------------------------------------------------------
+# Modern UI styling: Sidebar, Engine Picker, Sample Gallery, Footer
+# (one shared emerald palette so everything feels consistent)
 # ---------------------------------------------------------
 st.markdown("""
 <style>
@@ -125,106 +151,174 @@ st.markdown("""
 }
 
 /* =========================================================
-   RADIO "PILL / CARD" OPTIONS — shared by sidebar + sample selector
+   ENGINE PICKER — big tab-style buttons in the sidebar
    ========================================================= */
-[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"],
-[data-testid="stMain"] div[data-testid="stRadio"] > div[role="radiogroup"],
-section.main div[data-testid="stRadio"] > div[role="radiogroup"] {
-    display: flex !important;
-    gap: 8px !important;
+.fs-side-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fs-emerald-dark);
+    margin: 4px 0 8px;
 }
-[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] {
-    flex-direction: column !important;
+[class*="st-key-fs_engine_"],
+[class*="st-key-fs_engine_"] [data-testid="stButton"],
+[class*="st-key-fs_engine_"] button {
+    width: 100% !important;
 }
-[data-testid="stMain"] div[data-testid="stRadio"] > div[role="radiogroup"],
-section.main div[data-testid="stRadio"] > div[role="radiogroup"] {
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    background: linear-gradient(135deg, #f0fdf4, #f8fafc) !important;
-    border: 1px solid var(--fs-emerald-line) !important;
-    border-radius: 16px !important;
-    padding: 8px !important;
-    box-shadow: inset 0 1px 3px rgba(16, 185, 129, 0.08);
-}
-[data-testid="stMain"] div[data-testid="stRadio"] > label p,
-section.main div[data-testid="stRadio"] > label p {
-    font-weight: 700 !important;
-    color: var(--fs-text) !important;
-    font-size: 0.9rem !important;
-}
-
-/* Individual option */
-[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > label,
-[data-testid="stMain"] div[data-testid="stRadio"] > div[role="radiogroup"] > label,
-section.main div[data-testid="stRadio"] > div[role="radiogroup"] > label {
-    background: var(--fs-card) !important;
+[class*="st-key-fs_engine_"] button {
+    min-height: 56px !important;
+    padding: 12px 16px !important;
+    border-radius: 14px !important;
     border: 1.5px solid var(--fs-border) !important;
-    border-radius: 12px !important;
-    padding: 10px 16px !important;
-    margin: 0 !important;
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    background: var(--fs-card) !important;
+    color: var(--fs-text) !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
     transition: all .18s ease !important;
 }
-[data-testid="stMain"] div[data-testid="stRadio"] > div[role="radiogroup"] > label,
-section.main div[data-testid="stRadio"] > div[role="radiogroup"] > label {
-    flex: 1 1 auto !important;
-    justify-content: center !important;
-    text-align: center !important;
-}
-[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > label p,
-[data-testid="stMain"] div[data-testid="stRadio"] > div[role="radiogroup"] > label p,
-section.main div[data-testid="stRadio"] > div[role="radiogroup"] > label p {
-    color: var(--fs-text) !important;
-    font-weight: 600 !important;
-    font-size: 0.87rem !important;
+[class*="st-key-fs_engine_"] button p {
+    color: inherit !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
     margin: 0 !important;
 }
-
-/* Hover */
-[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover,
-[data-testid="stMain"] div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover,
-section.main div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover {
+[class*="st-key-fs_engine_"] button:hover {
     border-color: var(--fs-emerald) !important;
     background: var(--fs-emerald-soft) !important;
+    color: var(--fs-emerald-dark) !important;
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(16, 185, 129, 0.18);
+    box-shadow: 0 8px 16px rgba(16, 185, 129, 0.18) !important;
 }
-
-/* Selected */
-[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > label:has(input:checked),
-[data-testid="stMain"] div[data-testid="stRadio"] > div[role="radiogroup"] > label:has(input:checked),
-section.main div[data-testid="stRadio"] > div[role="radiogroup"] > label:has(input:checked) {
+[class*="st-key-fs_engine_"] button[kind="primary"],
+[class*="st-key-fs_engine_"] button[data-testid="stBaseButton-primary"] {
     background: linear-gradient(135deg, #10b981, #059669) !important;
     border-color: #059669 !important;
-    box-shadow: 0 8px 18px rgba(5, 150, 105, 0.35);
+    color: #ffffff !important;
+    box-shadow: 0 8px 18px rgba(5, 150, 105, 0.35) !important;
 }
-[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > label:has(input:checked) p,
-[data-testid="stMain"] div[data-testid="stRadio"] > div[role="radiogroup"] > label:has(input:checked) p,
-section.main div[data-testid="stRadio"] > div[role="radiogroup"] > label:has(input:checked) p {
+[class*="st-key-fs_engine_"] button[kind="primary"] p,
+[class*="st-key-fs_engine_"] button[data-testid="stBaseButton-primary"] p {
     color: #ffffff !important;
     font-weight: 800 !important;
 }
 
-/* Hide default radio circle */
-[data-testid="stSidebar"] div[data-testid="stRadio"] > div[role="radiogroup"] > label > div:first-child,
-[data-testid="stMain"] div[data-testid="stRadio"] > div[role="radiogroup"] > label > div:first-child,
-section.main div[data-testid="stRadio"] > div[role="radiogroup"] > label > div:first-child {
-    display: none !important;
-}
-
-/* Source-picker header chip */
+/* =========================================================
+   SAMPLE GALLERY — thumbnail cards
+   ========================================================= */
 .source-hint {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     color: var(--fs-muted);
-    margin: -4px 0 10px;
+    margin: -2px 0 12px;
+    line-height: 1.5;
 }
 .source-hint b { color: var(--fs-emerald-dark); }
+
+[class*="st-key-fs_card_"] {
+    background: var(--fs-card);
+    border: 1.5px solid var(--fs-border);
+    border-radius: 18px;
+    padding: 10px;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+[class*="st-key-fs_card_"]:hover {
+    transform: translateY(-3px);
+    border-color: var(--fs-emerald);
+    box-shadow: 0 12px 24px rgba(16, 185, 129, 0.18);
+}
+/* selected card = the one whose button is primary */
+[class*="st-key-fs_card_"]:has(button[kind="primary"]) {
+    border-color: var(--fs-emerald-dark);
+    background: linear-gradient(160deg, #ecfdf5, #ffffff);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25), 0 12px 26px rgba(16, 185, 129, 0.22);
+}
+[class*="st-key-fs_card_"]:has([data-testid="stBaseButton-primary"]) {
+    border-color: var(--fs-emerald-dark);
+    background: linear-gradient(160deg, #ecfdf5, #ffffff);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25), 0 12px 26px rgba(16, 185, 129, 0.22);
+}
+[class*="st-key-fs_card_"] img {
+    border-radius: 12px !important;
+}
+.fs-card-title {
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: var(--fs-ink);
+    line-height: 1.25;
+}
+.fs-card-sub {
+    font-size: 0.76rem;
+    color: var(--fs-muted);
+    margin-top: 2px;
+}
+.fs-thumb-missing {
+    height: 120px;
+    border-radius: 12px;
+    border: 1.5px dashed var(--fs-emerald-line);
+    background: var(--fs-emerald-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--fs-muted);
+    font-size: 0.78rem;
+    gap: 4px;
+}
+.fs-upload-body {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 4px 0;
+}
+.fs-upload-icon {
+    width: 54px;
+    height: 54px;
+    flex: 0 0 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    background: linear-gradient(135deg, #d1fae5, #cffafe);
+    border: 1.5px dashed var(--fs-emerald);
+}
+
+/* card buttons */
+[class*="st-key-fs_card_"] [data-testid="stButton"],
+[class*="st-key-fs_card_"] button {
+    width: 100% !important;
+}
+[class*="st-key-fs_card_"] button {
+    border-radius: 10px !important;
+    border: 1.5px solid var(--fs-emerald-line) !important;
+    background: var(--fs-emerald-soft) !important;
+    color: var(--fs-emerald-dark) !important;
+    min-height: 38px !important;
+    transition: all .15s ease !important;
+}
+[class*="st-key-fs_card_"] button p {
+    color: inherit !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    margin: 0 !important;
+}
+[class*="st-key-fs_card_"] button:hover:not(:disabled) {
+    background: var(--fs-emerald) !important;
+    border-color: var(--fs-emerald) !important;
+    color: #ffffff !important;
+}
+[class*="st-key-fs_card_"] button[kind="primary"],
+[class*="st-key-fs_card_"] button[data-testid="stBaseButton-primary"] {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    border-color: #059669 !important;
+    color: #ffffff !important;
+}
+[class*="st-key-fs_card_"] button:disabled {
+    opacity: 0.55 !important;
+}
 
 /* =========================================================
    FOOTER — light card, same palette as sidebar & selector
@@ -352,17 +446,58 @@ def clear_history():
     st.session_state.history = []
 
 
+@st.cache_data(show_spinner=False)
+def load_thumbnail(path_str, mtime):
+    """Square-ish cropped thumbnail for the sample gallery (cached)."""
+    img = Image.open(path_str).convert("RGB")
+    return ImageOps.fit(img, (360, 270), Image.LANCZOS)
+
+
+def sample_card(idx, name, path):
+    """One gallery card: thumbnail, title and a select button."""
+    path = Path(path)
+    exists = path.exists()
+    selected = st.session_state.source_choice == name
+
+    with st.container(key=f"fs_card_{idx}"):
+        if exists:
+            try:
+                show_image(load_thumbnail(str(path), path.stat().st_mtime))
+            except Exception:
+                render('<div class="fs-thumb-missing"><span>🖼️</span><span>Preview unavailable</span></div>')
+        else:
+            render('<div class="fs-thumb-missing"><span>🖼️</span><span>Image not found</span></div>')
+
+        render(f'<div class="fs-card-title">{escape(name)}</div>')
+        st.button(
+            "✓ Selected" if selected else "Select",
+            key=f"fs_pick_{idx}",
+            type="primary" if selected else "secondary",
+            disabled=not exists,
+            on_click=set_source,
+            args=(name,),
+        )
+
+
 # ---------------------------------------------------------
 # Sidebar Control Center
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown("### 🎛️ Control Center")
-    selected_engine = st.radio(
-        "Select Inference Engine",
-        [ENGINE_1_LABEL, ENGINE_2_LABEL, DUAL_LABEL],
-        index=0,
-        help="Switching engines changes the background AI model in real-time.",
-    )
+    render('<div class="fs-side-label">Inference engine</div>')
+
+    for i, (label, icon, tip) in enumerate(ENGINE_OPTIONS):
+        active = st.session_state.engine_choice == label
+        st.button(
+            f"{icon}  {label}" + ("   ✓" if active else ""),
+            key=f"fs_engine_{i}",
+            type="primary" if active else "secondary",
+            help=tip,
+            on_click=set_engine,
+            args=(label,),
+        )
+
+    selected_engine = st.session_state.engine_choice
 
     st.markdown("---")
     st.markdown("### 📡 System Status")
@@ -420,18 +555,45 @@ with tab_scan:
 
     with left:
         render('<div class="section-title">📥 Select Input Source</div>')
-        render('<div class="source-hint">👆 Pick <b>Upload File</b> or tap a ready-made <b>test sample</b> below.</div>')
+        render('<div class="source-hint">Upload your own photo, or tap a <b>test leaf</b> below. The selected card is highlighted in green.</div>')
 
-        # Modern pill selector for source / test presets
-        sample_choice = st.radio(
-            "Choose a sample leaf or upload your own:",
-            options=["📁 Upload File"] + list(SAMPLE_IMAGES.keys()),
-            index=0,
-            horizontal=True,
-            key="sample_selector_radio",
-        )
+        # ---- Upload card (full width) ----
+        upload_selected = st.session_state.source_choice == UPLOAD_KEY
+        with st.container(key="fs_card_upload"):
+            render("""
+            <div class="fs-upload-body">
+                <div class="fs-upload-icon">📁</div>
+                <div>
+                    <div class="fs-card-title">Upload your own leaf</div>
+                    <div class="fs-card-sub">JPG · PNG · WEBP</div>
+                </div>
+            </div>
+            """)
+            st.button(
+                "✓ Selected" if upload_selected else "Use upload",
+                key="fs_pick_upload",
+                type="primary" if upload_selected else "secondary",
+                on_click=set_source,
+                args=(UPLOAD_KEY,),
+            )
 
-        if sample_choice == "📁 Upload File":
+        # ---- Sample gallery (2 per row) ----
+        render('<div class="fs-side-label" style="margin-top:14px;">Test samples</div>')
+        sample_items = list(SAMPLE_IMAGES.items())
+        for row_start in range(0, len(sample_items), 2):
+            row_cols = st.columns(2, gap="small")
+            for offset, col in enumerate(row_cols):
+                idx = row_start + offset
+                if idx < len(sample_items):
+                    with col:
+                        sample_card(idx, sample_items[idx][0], sample_items[idx][1])
+
+        # ---- Resolve the chosen source ----
+        sample_choice = st.session_state.source_choice
+        if sample_choice != UPLOAD_KEY and sample_choice not in SAMPLE_IMAGES:
+            sample_choice = UPLOAD_KEY
+
+        if sample_choice == UPLOAD_KEY:
             uploaded_file = st.file_uploader(
                 "Drop a leaf sample here for instant analysis",
                 type=["jpg", "jpeg", "png", "webp"],
@@ -446,7 +608,7 @@ with tab_scan:
                     sample, image = None, None
                     st.error("😕 We couldn't read that image. Please upload a valid JPG, PNG, or WEBP file.")
         else:
-            sample_path = SAMPLE_IMAGES[sample_choice]
+            sample_path = Path(SAMPLE_IMAGES[sample_choice])
             if sample_path.exists():
                 try:
                     with open(sample_path, "rb") as f:
@@ -460,6 +622,7 @@ with tab_scan:
                 st.warning(f"Sample image `{sample_path}` not found in project directory.")
 
         if image is not None:
+            render('<div class="section-title" style="margin-top:14px;">🖼️ Selected Leaf</div>')
             show_image(image)
             render(f'<p class="muted" style="text-align:center;margin-top:8px;">📄 {escape(sample["name"])} · {image.size[0]}×{image.size[1]} px</p>')
 
