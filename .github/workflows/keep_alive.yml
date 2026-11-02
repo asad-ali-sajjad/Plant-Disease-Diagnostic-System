@@ -1,32 +1,26 @@
-name: Keep Streamlit App Awake
+name: keep-awake
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 jobs:
-  ping:
+  visit:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: "3.12"
 
       - name: Install Playwright
         run: |
           pip install playwright
-          playwright install chromium
+          playwright install --with-deps chromium
 
-      - name: Ping Streamlit App with Playwright
-        run: |
-          python -c "
-          from playwright.sync_api import sync_playwright
-          with sync_playwright() as p:
-              browser = p.chromium.launch(headless=True)
-              page = browser.new_page()
-              page.goto('https://https://plant-disease-diagnostic-system.streamlit.app/', wait_until='networkidle', timeout=60000)
-              print('Page loaded successfully')
-              browser.close()
-          "
+      - name: Visit app
+        run: python keep_awake.py
+        env:
+          APP_URL: https://plant-disease-diagnostic-system.streamlit.app
