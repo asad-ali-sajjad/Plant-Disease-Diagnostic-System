@@ -8,6 +8,7 @@ on:
 jobs:
   visit:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
@@ -21,6 +22,25 @@ jobs:
           playwright install --with-deps chromium
 
       - name: Visit app
-        run: python keep_awake.py
+        id: visit
+        shell: bash
         env:
           APP_URL: https://plant-disease-diagnostic-system.streamlit.app
+        run: python keep_awake.py 2>&1 | tee visit.log
+
+      - name: Report status
+        if: always()
+        shell: bash
+        run: |
+          if grep -q "App was asleep" visit.log; then
+            STATUS="😴 App was asleep, wake button clicked"
+          elif grep -q "already awake" visit.log; then
+            STATUS="✅ App was already awake"
+          else
+            STATUS="❌ Failed, check the Visit app step logs"
+          fi
+          echo "$STATUS"
+          {
+            echo "### keep-awake result"
+            echo "$STATUS"
+          } >> "$GITHUB_STEP_SUMMARY"
