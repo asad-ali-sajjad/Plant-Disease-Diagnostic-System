@@ -1,5 +1,6 @@
 """
 config.py — Master configuration file for FloraScan AI.
+
 Alphabetical ImageFolder class mapping for 5-class model:
   0 -> Non Leaf (Not_Leaf)
   1 -> Tomato Bacterial Spot (Tomato_Bacterial_spot)
@@ -10,27 +11,34 @@ Alphabetical ImageFolder class mapping for 5-class model:
 
 from html import escape
 from pathlib import Path
+from typing import Any, Dict, List
 
 # ---------------------------------------------------------
 # Academic & Developer Information
 # ---------------------------------------------------------
-STUDENT_NAME = "Asad Ali Sajjad"
-STUDENT_ID = "SU92-BSCSM-F23-167"
-CLASS_TERM = "BSCS-7A · 7th Semester"
-COURSE_INSTRUCTOR = "Deep Learning · Dr. Munir Ahmad"
+STUDENT_NAME: str = "Asad Ali Sajjad"
+STUDENT_ID: str = "SU92-BSCSM-F23-167"
+CLASS_TERM: str = "BSCS-7A · 7th Semester"
+COURSE_INSTRUCTOR: str = "Deep Learning · Dr. Munir Ahmad"
 
 # ---------------------------------------------------------
-# File Paths
+# File Paths & Checkpoint Resolution
 # ---------------------------------------------------------
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR: Path = Path(__file__).resolve().parent
 
-# Support 5-class filename conventions from Drive / Colab
-PATH_1 = BASE_DIR / "best_custom_cnn_5class.pth" if (BASE_DIR / "best_custom_cnn_5class.pth").exists() else BASE_DIR / "best_custom_cnn.pth"
-PATH_2 = BASE_DIR / "best_resnet18_5class.pth" if (BASE_DIR / "best_resnet18_5class.pth").exists() else BASE_DIR / "best_resnet18.pth"
-CSS_PATH = BASE_DIR / "styles.css"
+
+def _resolve_checkpoint(primary_filename: str, fallback_filename: str) -> Path:
+    """Helper function to resolve model checkpoint paths cleanly with fallback support."""
+    primary = BASE_DIR / primary_filename
+    return primary if primary.exists() else BASE_DIR / fallback_filename
+
+
+PATH_1: Path = _resolve_checkpoint("best_custom_cnn_5class.pth", "best_custom_cnn.pth")
+PATH_2: Path = _resolve_checkpoint("best_resnet18_5class.pth", "best_resnet18.pth")
+CSS_PATH: Path = BASE_DIR / "styles.css"
 
 # Pre-loaded sample images for dashboard testing
-SAMPLE_IMAGES = {
+SAMPLE_IMAGES: Dict[str, Path] = {
     "🌿 Healthy Tomato": BASE_DIR / "samples" / "tomato_healthy.jpg",
     "🍂 Bacterial Spot": BASE_DIR / "samples" / "bacterial_spot.jpg",
     "🍂 Early Blight": BASE_DIR / "samples" / "early_blight.jpg",
@@ -40,41 +48,41 @@ SAMPLE_IMAGES = {
 # ---------------------------------------------------------
 # Application Metadata
 # ---------------------------------------------------------
-APP_NAME = "FloraScan AI"
-APP_TAGLINE = "Calm, instant leaf diagnostics — drop a photo and let the engines read it."
-CROP_EMOJI = "🍅"
+APP_NAME: str = "FloraScan AI"
+APP_TAGLINE: str = "Calm, instant leaf diagnostics — drop a photo and let the engines read it."
+CROP_EMOJI: str = "🍅"
 
 # ---------------------------------------------------------
 # Engine Labels
 # ---------------------------------------------------------
-ENGINE_1_LABEL = "Primary Engine (CNN)"
-ENGINE_2_LABEL = "Secondary Engine (ResNet)"
-DUAL_LABEL = "Dual Benchmark Mode"
-ENGINE_1_SHORT = "Custom CNN"
-ENGINE_2_SHORT = "ResNet18"
+ENGINE_1_LABEL: str = "Primary Engine (CNN)"
+ENGINE_2_LABEL: str = "Secondary Engine (ResNet)"
+DUAL_LABEL: str = "Dual Benchmark Mode"
+ENGINE_1_SHORT: str = "Custom CNN"
+ENGINE_2_SHORT: str = "ResNet18"
 
 # ---------------------------------------------------------
 # Model Hyperparameters & Target Normalization
 # ---------------------------------------------------------
-CONFIDENCE_THRESHOLD = 65.0
-INPUT_SIZE = 224
-NORM_MEAN = [0.485, 0.456, 0.406]
-NORM_STD = [0.229, 0.224, 0.225]
+CONFIDENCE_THRESHOLD: float = 65.0
+INPUT_SIZE: int = 224
+NORM_MEAN: List[float] = [0.485, 0.456, 0.406]
+NORM_STD: List[float] = [0.229, 0.224, 0.225]
 
 # EXACT ALPHABETICAL ORDER CREATED BY PYTORCH ImageFolder:
-CLASS_NAMES = [
+CLASS_NAMES: List[str] = [
     "Non Leaf",                # Index 0 (Not_Leaf)
     "Tomato Bacterial Spot",   # Index 1 (Tomato_Bacterial_spot)
     "Tomato Early Blight",     # Index 2 (Tomato_Early_blight)
     "Tomato Late Blight",      # Index 3 (Tomato_Late_blight)
     "Tomato Healthy"           # Index 4 (Tomato_healthy)
 ]
-NUM_CLASSES = len(CLASS_NAMES)
+NUM_CLASSES: int = len(CLASS_NAMES)
 
 # ---------------------------------------------------------
 # Diagnostic Knowledge Base
 # ---------------------------------------------------------
-DIAGNOSTIC_GUIDE = {
+DIAGNOSTIC_GUIDE: Dict[str, Dict[str, str]] = {
     "Non Leaf": {
         "description": "The uploaded image does not appear to contain a plant leaf (detected noise, background object, or non-foliar pattern).",
         "action": "Please upload a clear, focused photo of a plant leaf for accurate pathology analysis.",
@@ -100,7 +108,7 @@ DIAGNOSTIC_GUIDE = {
 # ---------------------------------------------------------
 # UI Card Formatting Metadata
 # ---------------------------------------------------------
-UI_META = {
+UI_META: Dict[str, Dict[str, Any]] = {
     "Non Leaf": {
         "icon": "📷",
         "tone": "#64748b",
@@ -148,7 +156,7 @@ UI_META = {
     },
 }
 
-DEFAULT_META = {
+DEFAULT_META: Dict[str, Any] = {
     "icon": "🍃",
     "tone": "#0d9488",
     "bg": "linear-gradient(135deg,#f0fdfa,#ccfbf1)",
@@ -157,17 +165,19 @@ DEFAULT_META = {
     "signs": [],
     "desc_html": "",
 }
-UNKNOWN_TONE = "#f59e0b"
+UNKNOWN_TONE: str = "#f59e0b"
 
 
-def get_guide(name: str) -> dict:
+def get_guide(name: str) -> Dict[str, str]:
+    """Retrieve diagnostic guide entry for a given class name with safe fallback."""
     return DIAGNOSTIC_GUIDE.get(name, {
         "description": "No description added yet for this class.",
         "action": "Consult an agronomist for guidance.",
     })
 
 
-def get_meta(name: str) -> dict:
+def get_meta(name: str) -> Dict[str, Any]:
+    """Retrieve UI metadata for a given class name merged cleanly over default metadata."""
     meta = {**DEFAULT_META, **UI_META.get(name, {})}
     if not meta.get("desc_html"):
         meta["desc_html"] = escape(get_guide(name)["description"])
